@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BASH — Jeremy Avalon LLC</title>
+  <title>BASH &#8212; Jeremy Avalon LLC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -27,7 +27,7 @@
       background: var(--black);
       color: var(--bone);
       font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
     }
@@ -60,10 +60,7 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-
-    #header-title span {
-      color: var(--accent);
-    }
+    #header-title span { color: var(--accent); }
 
     #header-actions {
       display: flex;
@@ -90,24 +87,27 @@
       white-space: nowrap;
       transition: color 0.12s, border-color 0.12s;
     }
-    .cmd-btn:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-    .cmd-btn:focus-visible {
-      outline: 1px solid var(--accent);
-      outline-offset: 2px;
-    }
+    .cmd-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .cmd-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
     /* ── Messages ── */
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 32px 24px;
+      padding: 40px 24px;
       display: flex;
       flex-direction: column;
       gap: 0;
-      max-width: 100%;
+    }
+
+    /* Inner container constrains width */
+    #messages-inner {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
 
     .exchange {
@@ -115,53 +115,100 @@
       flex-direction: column;
       gap: 0;
     }
-
     .exchange + .exchange {
       border-top: 1px solid var(--cream);
-      margin-top: 24px;
-      padding-top: 24px;
+      margin-top: 32px;
+      padding-top: 32px;
     }
 
-    /* User line */
+    /* User line — hidden for cold start */
     .msg-user {
-      font-size: 15px;
+      font-size: 16px;
       color: var(--bone);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
     .msg-user::before {
       content: '> ';
       color: var(--accent);
       font-weight: 600;
     }
+    .msg-user.hidden { display: none; }
 
-    /* System response */
+    /* System response — rendered markdown */
     .msg-system {
-      font-size: 14px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.8;
       color: var(--bone);
-      white-space: pre-wrap;
       word-break: break-word;
-      padding-left: 16px;
-      border-left: 1px solid var(--elevated);
+    }
+
+    /* Markdown rendering within .msg-system */
+    .msg-system p { margin-bottom: 12px; }
+    .msg-system p:last-child { margin-bottom: 0; }
+
+    .msg-system strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .msg-system em {
+      color: var(--stone);
+      font-style: normal;
+    }
+
+    .msg-system ul, .msg-system ol {
+      padding-left: 24px;
+      margin-bottom: 12px;
+    }
+    .msg-system li { margin-bottom: 4px; }
+
+    .msg-system hr {
+      border: none;
+      border-top: 1px solid var(--cream);
+      margin: 20px 0;
+    }
+
+    .msg-system code {
+      background: var(--elevated);
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-size: 13px;
+      color: var(--bone);
+    }
+
+    .msg-system pre {
+      background: var(--elevated);
+      padding: 16px;
+      border-radius: 2px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .msg-system pre code {
+      background: none;
+      padding: 0;
+    }
+
+    /* Section label style (SITUATION:, ACTION ITEMS:, etc.) */
+    .msg-system .label {
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.06em;
     }
 
     /* Error */
     .msg-error {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--error);
-      padding-left: 16px;
-      border-left: 1px solid var(--error);
     }
 
     /* Loading state */
-    .loading-line {
-      padding-left: 16px;
-      border-left: 1px solid var(--elevated);
-    }
+    .loading-line { display: flex; flex-direction: column; }
     .cursor-blink {
       display: inline-block;
-      width: 9px;
-      height: 15px;
+      width: 10px;
+      height: 17px;
       background: var(--accent);
       vertical-align: text-bottom;
       animation: blink 1s step-end infinite;
@@ -174,7 +221,7 @@
       font-size: 11px;
       color: var(--stone);
       letter-spacing: 0.08em;
-      margin-top: 8px;
+      margin-top: 10px;
       display: none;
     }
     .processing-text.visible { display: block; }
@@ -184,22 +231,27 @@
       flex-shrink: 0;
       background: var(--surface);
       border-top: 1px solid var(--cream);
-      padding: 16px 24px;
+      padding: 16px 24px 20px;
+    }
+
+    #input-inner {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
     }
 
     #input-row {
       display: flex;
       align-items: flex-end;
       gap: 0;
-      max-width: 720px;
     }
 
     #input-prefix {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--accent);
       padding-bottom: 8px;
-      padding-right: 10px;
+      padding-right: 12px;
       flex-shrink: 0;
       user-select: none;
       line-height: 1;
@@ -208,7 +260,7 @@
     #user-input {
       flex: 1;
       font-family: inherit;
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.5;
       color: var(--bone);
       background: transparent;
@@ -236,7 +288,7 @@
       color: var(--bone);
       background: transparent;
       border: 1px solid var(--stone);
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 2px;
       cursor: pointer;
       margin-left: 16px;
@@ -245,10 +297,7 @@
       transition: color 0.12s, border-color 0.12s;
       white-space: nowrap;
     }
-    #run-btn:hover:not(:disabled) {
-      color: var(--accent);
-      border-color: var(--accent);
-    }
+    #run-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
     #run-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     #run-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
@@ -256,24 +305,22 @@
       font-size: 11px;
       color: var(--stone);
       letter-spacing: 0.06em;
-      margin-top: 8px;
-      padding-left: 22px;
+      margin-top: 10px;
+      padding-left: 28px;
     }
 
     /* ── Responsive ── */
     @media (max-width: 600px) {
-      #header { padding: 0 16px; height: 44px; }
+      #header { padding: 0 16px; }
       #header-title { font-size: 12px; }
-      .cmd-btn { font-size: 9px; padding: 3px 8px; }
+      .cmd-btn { font-size: 9px; padding: 3px 7px; letter-spacing: 0.06em; }
       #messages { padding: 24px 16px; }
-      #input-wrap { padding: 12px 16px; }
-      #input-prefix { font-size: 14px; }
-      #user-input { font-size: 14px; }
+      #input-wrap { padding: 12px 16px 16px; }
     }
 
     @media (min-width: 1024px) {
-      #messages { padding: 40px 40px; }
-      #input-wrap { padding: 20px 40px; }
+      #messages { padding: 48px 40px; }
+      #input-wrap { padding: 20px 40px 24px; }
     }
   </style>
 </head>
@@ -281,7 +328,7 @@
 <div id="app">
 
   <header id="header" role="banner">
-    <div id="header-title">BASH v1 &mdash; <span>Jeremy Avalon LLC</span></div>
+    <div id="header-title">BASH v1 &nbsp;&mdash;&nbsp; <span>Jeremy Avalon LLC</span></div>
     <nav id="header-actions" aria-label="Quick commands">
       <button class="cmd-btn" onclick="sendCmd('BOOKINGS')" aria-label="Bookings">BOOKINGS</button>
       <button class="cmd-btn" onclick="sendCmd('CONTENT')"  aria-label="Content">CONTENT</button>
@@ -291,27 +338,30 @@
     </nav>
   </header>
 
-  <main id="messages" role="main" aria-live="polite" aria-label="Conversation"></main>
+  <main id="messages" role="main" aria-live="polite" aria-label="Conversation">
+    <div id="messages-inner"></div>
+  </main>
 
   <footer id="input-wrap">
-    <div id="input-row">
-      <span id="input-prefix" aria-hidden="true">&gt;</span>
-      <textarea
-        id="user-input"
-        placeholder="type a command or question..."
-        rows="1"
-        aria-label="Input"
-        autocomplete="off"
-        spellcheck="false"
-      ></textarea>
-      <button id="run-btn" onclick="sendMessage()" disabled aria-label="Run">RUN</button>
+    <div id="input-inner">
+      <div id="input-row">
+        <span id="input-prefix" aria-hidden="true">&gt;</span>
+        <textarea
+          id="user-input"
+          placeholder="type a command or question..."
+          rows="1"
+          aria-label="Input"
+          autocomplete="off"
+          spellcheck="false"
+        ></textarea>
+        <button id="run-btn" onclick="sendMessage()" disabled aria-label="Run">RUN</button>
+      </div>
+      <div id="input-hint">enter to send &nbsp;&middot;&nbsp; shift+enter for new line</div>
     </div>
-    <div id="input-hint">enter to send &nbsp;&middot;&nbsp; shift+enter for new line</div>
   </footer>
 
 </div>
 <script>
-// ── Client config ──────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are FounderOS, the dedicated business operating system for Jeremy Avalon LLC. You exist to help Jeremy build a sustainable, scalable DJ and music performance business — starting with Atlanta, expanding nationally and internationally.
 
 ## CLIENT CONTEXT
@@ -363,22 +413,79 @@ Commands:
   OUTREACH  — build your Atlanta venue list and start sending
 ---`;
 
-// ── State ──────────────────────────────────────────────────────────────────
-let messages   = [];
-let isLoading  = false;
-let coldDone   = false;
+// ── Lightweight markdown renderer ──────────────────────────────────────
+function renderMarkdown(text) {
+  // Escape HTML first
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-const msgsEl   = document.getElementById('messages');
-const inputEl  = document.getElementById('user-input');
-const runBtn   = document.getElementById('run-btn');
+  // Horizontal rule
+  html = html.replace(/^---+$/gm, '<hr>');
 
-// ── DOM helpers ───────────────────────────────────────────────────────────
-function createExchange(userText) {
+  // Fenced code blocks
+  html = html.replace(/```[\s\S]*?```/g, (m) => {
+    const inner = m.replace(/^```[^\n]*\n?/, '').replace(/```$/, '');
+    return `<pre><code>${inner}</code></pre>`;
+  });
+
+  // Bold: **text**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // Italic: *text* (single)
+  html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Unordered lists — collect consecutive lines starting with - or *
+  html = html.replace(/((?:^[ \t]*[-*] .+\n?)+)/gm, (block) => {
+    const items = block.trim().split('\n').map(l => {
+      const content = l.replace(/^[ \t]*[-*] /, '');
+      return `<li>${content}</li>`;
+    }).join('');
+    return `<ul>${items}</ul>`;
+  });
+
+  // Ordered lists
+  html = html.replace(/((?:^[ \t]*\d+\. .+\n?)+)/gm, (block) => {
+    const items = block.trim().split('\n').map(l => {
+      const content = l.replace(/^[ \t]*\d+\. /, '');
+      return `<li>${content}</li>`;
+    }).join('');
+    return `<ol>${items}</ol>`;
+  });
+
+  // Paragraphs — wrap blocks of text separated by blank lines
+  html = html.split(/\n{2,}/).map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (/^<(ul|ol|pre|hr|li)/.test(block)) return block;
+    // Preserve single line breaks within a paragraph
+    block = block.replace(/\n/g, '<br>');
+    return `<p>${block}</p>`;
+  }).join('\n');
+
+  return html;
+}
+
+// ── State ───────────────────────────────────────────────────────────────
+let messages  = [];
+let isLoading = false;
+
+const innerEl = document.getElementById('messages-inner');
+const msgsEl  = document.getElementById('messages');
+const inputEl = document.getElementById('user-input');
+const runBtn  = document.getElementById('run-btn');
+
+// ── DOM helpers ─────────────────────────────────────────────────────────
+function createExchange(userText, hiddenUser) {
   const ex = document.createElement('div');
   ex.className = 'exchange';
 
   const uLine = document.createElement('div');
-  uLine.className = 'msg-user';
+  uLine.className = hiddenUser ? 'msg-user hidden' : 'msg-user';
   uLine.textContent = userText;
   ex.appendChild(uLine);
 
@@ -386,10 +493,15 @@ function createExchange(userText) {
 }
 
 function appendSystemMsg(exchange, text, isError) {
-  const p = document.createElement('div');
-  p.className = isError ? 'msg-error' : 'msg-system';
-  p.textContent = text;
-  exchange.appendChild(p);
+  const div = document.createElement('div');
+  if (isError) {
+    div.className = 'msg-error';
+    div.textContent = text;
+  } else {
+    div.className = 'msg-system';
+    div.innerHTML = renderMarkdown(text);
+  }
+  exchange.appendChild(div);
   scroll();
 }
 
@@ -410,8 +522,6 @@ function appendLoading(exchange) {
 
   exchange.appendChild(wrap);
   scroll();
-
-  // Show "Processing..." text after 400ms
   setTimeout(() => proc.classList.add('visible'), 400);
   return wrap;
 }
@@ -425,13 +535,13 @@ function scroll() {
   msgsEl.scrollTop = msgsEl.scrollHeight;
 }
 
-// ── API call ──────────────────────────────────────────────────────────────
-async function callClaude(userText) {
+// ── API call ────────────────────────────────────────────────────────────
+async function callClaude(userText, hiddenUser) {
   messages.push({ role: 'user', content: userText });
 
-  const exchange = createExchange(userText);
-  msgsEl.appendChild(exchange);
-  const loadingEl = appendLoading(exchange);
+  const exchange = createExchange(userText, hiddenUser);
+  innerEl.appendChild(exchange);
+  appendLoading(exchange);
 
   isLoading = true;
   runBtn.disabled = true;
@@ -449,10 +559,7 @@ async function callClaude(userText) {
     });
 
     const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error?.message || `HTTP ${res.status}`);
-    }
+    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
 
     const reply = data.content[0].text;
     messages.push({ role: 'assistant', content: reply });
@@ -466,18 +573,19 @@ async function callClaude(userText) {
   }
 
   isLoading = false;
-  runBtn.disabled = false;
+  runBtn.disabled = inputEl.value.trim().length === 0;
   inputEl.focus();
 }
 
-// ── Send ──────────────────────────────────────────────────────────────────
+// ── Send ────────────────────────────────────────────────────────────────
 async function sendMessage() {
   if (isLoading) return;
   const text = inputEl.value.trim();
   if (!text) return;
   inputEl.value = '';
   inputEl.style.height = '32px';
-  await callClaude(text);
+  runBtn.disabled = true;
+  await callClaude(text, false);
 }
 
 function sendCmd(cmd) {
@@ -486,14 +594,7 @@ function sendCmd(cmd) {
   sendMessage();
 }
 
-// ── Cold start ────────────────────────────────────────────────────────────
-async function coldStart() {
-  coldDone = true;
-  runBtn.disabled = false;
-  await callClaude('load');
-}
-
-// ── Input behaviour ───────────────────────────────────────────────────────
+// ── Input behaviour ─────────────────────────────────────────────────────
 inputEl.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
@@ -506,10 +607,11 @@ inputEl.addEventListener('input', () => {
   const sh = Math.min(inputEl.scrollHeight, 128);
   inputEl.style.height = sh + 'px';
   inputEl.style.overflow = inputEl.scrollHeight > 128 ? 'auto' : 'hidden';
+  runBtn.disabled = inputEl.value.trim().length === 0 || isLoading;
 });
 
-// ── Boot ──────────────────────────────────────────────────────────────────
-coldStart();
+// ── Boot — cold start is silent (user never sees "load") ────────────────
+callClaude('load', true);
 </script>
 </body>
 </html>
