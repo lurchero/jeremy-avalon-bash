@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BASH — Jeremy Avalon LLC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:        #0A0A0A;
+      --surface:      #111111;
+      --elevated:     #1A1A1A;
+      --bone:         #F5F0EB;
+      --stone:        #8C8378;
+      --cream:        #E8E0D6;
+      --accent:       #C4A46C;
+      --accent-hover: #B8964E;
+      --error:        #B54040;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--black);
+      color: var(--bone);
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 0; }
+
+    /* ── Layout ── */
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Header ── */
+    #header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 48px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--cream);
+      flex-shrink: 0;
+      gap: 16px;
+    }
+
+    #header-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--bone);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #header-title span {
+      color: var(--accent);
+    }
+
+    #header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    #header-actions::-webkit-scrollbar { display: none; }
+
+    .cmd-btn {
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--stone);
+      background: transparent;
+      border: 1px solid var(--stone);
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .cmd-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .cmd-btn:focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Messages ── */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 100%;
+    }
+
+    .exchange {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .exchange + .exchange {
+      border-top: 1px solid var(--cream);
+      margin-top: 24px;
+      padding-top: 24px;
+    }
+
+    /* User line */
+    .msg-user {
+      font-size: 15px;
+      color: var(--bone);
+      margin-bottom: 16px;
+    }
+    .msg-user::before {
+      content: '> ';
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* System response */
+    .msg-system {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--bone);
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding-left: 16px;
+      border-left: 1px solid var(--elevated);
+    }
+
+    /* Error */
+    .msg-error {
+      font-size: 13px;
+      color: var(--error);
+      padding-left: 16px;
+      border-left: 1px solid var(--error);
+    }
+
+    /* Loading state */
+    .loading-line {
+      padding-left: 16px;
+      border-left: 1px solid var(--elevated);
+    }
+    .cursor-blink {
+      display: inline-block;
+      width: 9px;
+      height: 15px;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+    .processing-text {
+      font-size: 11px;
+      color: var(--stone);
+      letter-spacing: 0.08em;
+      margin-top: 8px;
+      display: none;
+    }
+    .processing-text.visible { display: block; }
+
+    /* ── Input area ── */
+    #input-wrap {
+      flex-shrink: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--cream);
+      padding: 16px 24px;
+    }
+
+    #input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      max-width: 720px;
+    }
+
+    #input-prefix {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      padding-bottom: 8px;
+      padding-right: 10px;
+      flex-shrink: 0;
+      user-select: none;
+      line-height: 1;
+    }
+
+    #user-input {
+      flex: 1;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--bone);
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--cream);
+      outline: none;
+      padding: 0 0 8px 0;
+      resize: none;
+      height: 32px;
+      min-height: 32px;
+      max-height: 128px;
+      overflow-y: hidden;
+      transition: border-color 0.15s;
+      caret-color: var(--accent);
+    }
+    #user-input:focus { border-bottom-color: var(--accent); }
+    #user-input::placeholder { color: var(--stone); }
+
+    #run-btn {
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--bone);
+      background: transparent;
+      border: 1px solid var(--stone);
+      padding: 6px 14px;
+      border-radius: 2px;
+      cursor: pointer;
+      margin-left: 16px;
+      margin-bottom: 2px;
+      flex-shrink: 0;
+      transition: color 0.12s, border-color 0.12s;
+      white-space: nowrap;
+    }
+    #run-btn:hover:not(:disabled) {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    #run-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    #run-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+    #input-hint {
+      font-size: 11px;
+      color: var(--stone);
+      letter-spacing: 0.06em;
+      margin-top: 8px;
+      padding-left: 22px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      #header { padding: 0 16px; height: 44px; }
+      #header-title { font-size: 12px; }
+      .cmd-btn { font-size: 9px; padding: 3px 8px; }
+      #messages { padding: 24px 16px; }
+      #input-wrap { padding: 12px 16px; }
+      #input-prefix { font-size: 14px; }
+      #user-input { font-size: 14px; }
+    }
+
+    @media (min-width: 1024px) {
+      #messages { padding: 40px 40px; }
+      #input-wrap { padding: 20px 40px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <header id="header" role="banner">
+    <div id="header-title">BASH v1 &mdash; <span>Jeremy Avalon LLC</span></div>
+    <nav id="header-actions" aria-label="Quick commands">
+      <button class="cmd-btn" onclick="sendCmd('BOOKINGS')" aria-label="Bookings">BOOKINGS</button>
+      <button class="cmd-btn" onclick="sendCmd('CONTENT')"  aria-label="Content">CONTENT</button>
+      <button class="cmd-btn" onclick="sendCmd('REVENUE')"  aria-label="Revenue">REVENUE</button>
+      <button class="cmd-btn" onclick="sendCmd('ADMIN')"    aria-label="Admin">ADMIN</button>
+      <button class="cmd-btn" onclick="sendCmd('OUTREACH')" aria-label="Outreach">OUTREACH</button>
+    </nav>
+  </header>
+
+  <main id="messages" role="main" aria-live="polite" aria-label="Conversation"></main>
+
+  <footer id="input-wrap">
+    <div id="input-row">
+      <span id="input-prefix" aria-hidden="true">&gt;</span>
+      <textarea
+        id="user-input"
+        placeholder="type a command or question..."
+        rows="1"
+        aria-label="Input"
+        autocomplete="off"
+        spellcheck="false"
+      ></textarea>
+      <button id="run-btn" onclick="sendMessage()" disabled aria-label="Run">RUN</button>
+    </div>
+    <div id="input-hint">enter to send &nbsp;&middot;&nbsp; shift+enter for new line</div>
+  </footer>
+
+</div>
+<script>
+// ── Client config ──────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are FounderOS, the dedicated business operating system for Jeremy Avalon LLC. You exist to help Jeremy build a sustainable, scalable DJ and music performance business — starting with Atlanta, expanding nationally and internationally.
+
+## CLIENT CONTEXT
+- Founder: Jeremy Avalon
+- Business: Jeremy Avalon LLC
+- Core Offer: Live DJ performances, residencies, and events (Atlanta base expanding nationally/internationally)
+- Music historian expertise: secondary differentiator with major long-term value
+- Pricing: Per event/gig
+- Current Revenue: $3,000/month at 20% margin ($600 net)
+- Primary Constraint: No streamlined system for social media and business administration
+- Assets: Instagram 13K, TikTok 7K, website with EPK
+- Tools: Google Docs, Sheets, Drive, Asana
+- Weekly Capacity: 15 hours
+- Runway: 2-4 months — treat this as urgent
+- Decision Style: Collaborative + data-driven + gut-driven
+- 30-Day Target: Increase local/regional visibility + build consistent admin workflow via Meta Business Suite
+- Long-Term Vision: 10x profit margin, international gigging and touring, educational platform on music history
+- Client ID: jeremy-avalon
+
+## OPERATING RULES
+1. EXECUTION-FIRST: Every response must include at least one specific actionable next step
+2. NO FLUFF: Skip pleasantries and theory
+3. REVENUE-FOCUSED: Always connect recommendations to booking revenue or margin improvement
+4. CONSTRAINT-AWARE: Jeremy has 15 hrs/week and a short runway — keep solutions lean and fast
+5. ASSETS-FIRST: Leverage Instagram 13K + TikTok 7K + website before suggesting new platforms
+6. MUSIC HISTORIAN ANGLE: Surface this differentiator in content, outreach, and positioning whenever relevant
+
+## RESPONSE FORMAT
+Every response must include:
+
+**SITUATION:** One-line read of where things stand
+**ACTION ITEMS:** 3-5 specific, executable tasks with clear owners and deadlines
+**METRICS:** How to measure progress
+**NEXT SESSION:** What to focus on next time
+
+## COLD START
+On first message (any content), output exactly:
+
+---
+FounderOS loaded for Jeremy Avalon LLC — jeremy-avalon
+
+You have 13K on Instagram and 7K on TikTok — and 1-3 bookings a month. The audience is there. The pipeline is not. Today we fix that.
+
+Commands:
+  BOOKINGS  — close something this week
+  CONTENT   — build a 4-week calendar that works
+  REVENUE   — find the money you are leaving on the table
+  ADMIN     — reclaim 5 hours a week with a real system
+  OUTREACH  — build your Atlanta venue list and start sending
+---`;
+
+// ── State ──────────────────────────────────────────────────────────────────
+let messages   = [];
+let isLoading  = false;
+let coldDone   = false;
+
+const msgsEl   = document.getElementById('messages');
+const inputEl  = document.getElementById('user-input');
+const runBtn   = document.getElementById('run-btn');
+
+// ── DOM helpers ───────────────────────────────────────────────────────────
+function createExchange(userText) {
+  const ex = document.createElement('div');
+  ex.className = 'exchange';
+
+  const uLine = document.createElement('div');
+  uLine.className = 'msg-user';
+  uLine.textContent = userText;
+  ex.appendChild(uLine);
+
+  return ex;
+}
+
+function appendSystemMsg(exchange, text, isError) {
+  const p = document.createElement('div');
+  p.className = isError ? 'msg-error' : 'msg-system';
+  p.textContent = text;
+  exchange.appendChild(p);
+  scroll();
+}
+
+function appendLoading(exchange) {
+  const wrap = document.createElement('div');
+  wrap.className = 'loading-line';
+  wrap.id = 'loading-wrap';
+
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor-blink';
+  cursor.setAttribute('aria-hidden', 'true');
+  wrap.appendChild(cursor);
+
+  const proc = document.createElement('div');
+  proc.className = 'processing-text';
+  proc.textContent = 'Processing...';
+  wrap.appendChild(proc);
+
+  exchange.appendChild(wrap);
+  scroll();
+
+  // Show "Processing..." text after 400ms
+  setTimeout(() => proc.classList.add('visible'), 400);
+  return wrap;
+}
+
+function removeLoading() {
+  const el = document.getElementById('loading-wrap');
+  if (el) el.remove();
+}
+
+function scroll() {
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+// ── API call ──────────────────────────────────────────────────────────────
+async function callClaude(userText) {
+  messages.push({ role: 'user', content: userText });
+
+  const exchange = createExchange(userText);
+  msgsEl.appendChild(exchange);
+  const loadingEl = appendLoading(exchange);
+
+  isLoading = true;
+  runBtn.disabled = true;
+
+  try {
+    const res = await fetch('/.netlify/functions/claude-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: SYSTEM_PROMPT,
+        messages,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error?.message || `HTTP ${res.status}`);
+    }
+
+    const reply = data.content[0].text;
+    messages.push({ role: 'assistant', content: reply });
+
+    removeLoading();
+    appendSystemMsg(exchange, reply, false);
+  } catch (err) {
+    messages.pop();
+    removeLoading();
+    appendSystemMsg(exchange, 'Error: ' + err.message, true);
+  }
+
+  isLoading = false;
+  runBtn.disabled = false;
+  inputEl.focus();
+}
+
+// ── Send ──────────────────────────────────────────────────────────────────
+async function sendMessage() {
+  if (isLoading) return;
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  inputEl.style.height = '32px';
+  await callClaude(text);
+}
+
+function sendCmd(cmd) {
+  if (isLoading) return;
+  inputEl.value = cmd;
+  sendMessage();
+}
+
+// ── Cold start ────────────────────────────────────────────────────────────
+async function coldStart() {
+  coldDone = true;
+  runBtn.disabled = false;
+  await callClaude('load');
+}
+
+// ── Input behaviour ───────────────────────────────────────────────────────
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = '32px';
+  const sh = Math.min(inputEl.scrollHeight, 128);
+  inputEl.style.height = sh + 'px';
+  inputEl.style.overflow = inputEl.scrollHeight > 128 ? 'auto' : 'hidden';
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+coldStart();
+</script>
+</body>
+</html>
