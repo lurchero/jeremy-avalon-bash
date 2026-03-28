@@ -6,7 +6,7 @@
   <title>BASH &#8212; Jeremy Avalon LLC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,179 +36,381 @@
     ::-webkit-scrollbar-track { background: var(--black); }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 0; }
 
-    /* ── Layout ── */
-    #app { display: flex; flex-direction: column; height: 100vh; }
+    /* ── Layout ─────────────────────────────────────────── */
+    #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    /* ── Header ── */
+    /* ── Header ─────────────────────────────────────────── */
     #header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
+      padding: 0 32px;
       height: 48px;
       background: var(--surface);
       border-bottom: 1px solid var(--cream);
       flex-shrink: 0;
-      gap: 16px;
+    }
+
+    #header-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
     }
 
     #header-title {
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--bone);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
       white-space: nowrap;
+    }
+
+    #header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #session-label {
+      font-size: 11px;
+      color: var(--stone);
+      letter-spacing: 0.10em;
+      white-space: nowrap;
+    }
+
+    #status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--stone);
+      transition: background 0.3s;
       flex-shrink: 0;
     }
-    #header-title span { color: var(--accent); }
+    #status-dot.live { background: var(--accent); }
 
-    #header-actions {
+    /* ── Commands Row ───────────────────────────────────── */
+    #commands-row {
       display: flex;
+      align-items: center;
       gap: 8px;
-      flex-wrap: nowrap;
+      padding: 0 32px;
+      height: 40px;
+      background: var(--black);
+      border-bottom: 1px solid var(--elevated);
+      flex-shrink: 0;
       overflow-x: auto;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    #header-actions::-webkit-scrollbar { display: none; }
+    #commands-row::-webkit-scrollbar { display: none; }
+
+    #commands-label {
+      font-size: 10px;
+      color: var(--stone);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
 
     .cmd-btn {
       font-family: inherit;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 500;
       letter-spacing: 0.10em;
       text-transform: uppercase;
       color: var(--stone);
       background: transparent;
-      border: 1px solid var(--stone);
-      padding: 4px 10px;
+      border: 1px solid var(--elevated);
+      padding: 5px 14px;
       border-radius: 2px;
       cursor: pointer;
       white-space: nowrap;
-      transition: color 0.12s, border-color 0.12s;
+      flex-shrink: 0;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
     }
-    .cmd-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .cmd-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(196, 164, 108, 0.04);
+    }
+    .cmd-btn:active { opacity: 0.7; }
     .cmd-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
-    /* ── Messages ── */
+    /* ── Messages ───────────────────────────────────────── */
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 40px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+      padding: 0;
     }
 
-    /* Inner container constrains width */
     #messages-inner {
       width: 100%;
-      max-width: 760px;
+      max-width: 800px;
       margin: 0 auto;
+      padding: 48px 32px 32px;
       display: flex;
       flex-direction: column;
       gap: 0;
     }
 
+    /* ── Init state ─────────────────────────────────────── */
+    #init-state {
+      font-size: 13px;
+      color: var(--stone);
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #init-state.hidden { display: none; }
+
+    /* ── Exchange block ─────────────────────────────────── */
     .exchange {
       display: flex;
       flex-direction: column;
       gap: 0;
     }
+
     .exchange + .exchange {
-      border-top: 1px solid var(--cream);
-      margin-top: 32px;
-      padding-top: 32px;
+      margin-top: 48px;
+      padding-top: 48px;
+      border-top: 1px solid var(--elevated);
     }
 
-    /* User line — hidden for cold start */
+    /* User line */
     .msg-user {
-      font-size: 16px;
+      font-size: 15px;
+      font-weight: 500;
       color: var(--bone);
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
     }
     .msg-user::before {
-      content: '> ';
+      content: '>';
       color: var(--accent);
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
     }
     .msg-user.hidden { display: none; }
 
-    /* System response — rendered markdown */
+    /* System response wrapper */
     .msg-system {
       font-size: 15px;
-      line-height: 1.8;
+      line-height: 1.85;
       color: var(--bone);
       word-break: break-word;
     }
 
-    /* Markdown rendering within .msg-system */
-    .msg-system p { margin-bottom: 12px; }
-    .msg-system p:last-child { margin-bottom: 0; }
+    /* Response timestamp */
+    .response-meta {
+      font-size: 11px;
+      color: var(--stone);
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-    .msg-system strong {
-      color: var(--accent);
+    .copy-btn {
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--stone);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 2px 0;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.12s;
+    }
+    .exchange:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { color: var(--accent); }
+    .copy-btn.copied { color: var(--accent); opacity: 1; }
+
+    /* ── Section rendering ──────────────────────────────── */
+    .response-section {
+      margin-bottom: 24px;
+    }
+    .response-section:last-child { margin-bottom: 0; }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--stone);
+      border: 1px solid var(--elevated);
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-bottom: 10px;
+    }
+
+    .section-body {
+      color: var(--bone);
+      font-size: 15px;
+      line-height: 1.85;
+    }
+
+    /* Plain paragraphs */
+    .section-body p { margin-bottom: 10px; }
+    .section-body p:last-child { margin-bottom: 0; }
+
+    /* Bold within section body */
+    .section-body strong {
+      color: var(--bone);
       font-weight: 600;
     }
 
-    .msg-system em {
-      color: var(--stone);
-      font-style: normal;
+    /* Action items — numbered list */
+    .section-body ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: action-counter;
     }
-
-    .msg-system ul, .msg-system ol {
-      padding-left: 24px;
+    .section-body ol li {
+      counter-increment: action-counter;
+      display: flex;
+      gap: 14px;
       margin-bottom: 12px;
+      align-items: baseline;
     }
-    .msg-system li { margin-bottom: 4px; }
-
-    .msg-system hr {
-      border: none;
-      border-top: 1px solid var(--cream);
-      margin: 20px 0;
+    .section-body ol li::before {
+      content: counter(action-counter, decimal-leading-zero) '.';
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+      min-width: 24px;
     }
 
-    .msg-system code {
+    /* Unordered lists */
+    .section-body ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .section-body ul li {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+      align-items: baseline;
+    }
+    .section-body ul li::before {
+      content: '—';
+      color: var(--stone);
+      flex-shrink: 0;
+    }
+
+    /* Inline code */
+    .section-body code {
       background: var(--elevated);
       padding: 1px 6px;
       border-radius: 2px;
       font-size: 13px;
-      color: var(--bone);
     }
 
-    .msg-system pre {
+    /* Code block */
+    .section-body pre {
       background: var(--elevated);
-      padding: 16px;
+      padding: 16px 20px;
       border-radius: 2px;
       overflow-x: auto;
-      margin-bottom: 12px;
+      margin: 12px 0;
       font-size: 13px;
       line-height: 1.6;
+      border-left: 2px solid var(--accent);
     }
-    .msg-system pre code {
-      background: none;
-      padding: 0;
+    .section-body pre code { background: none; padding: 0; }
+
+    /* HR */
+    .section-body hr {
+      border: none;
+      border-top: 1px solid var(--elevated);
+      margin: 16px 0;
     }
 
-    /* Section label style (SITUATION:, ACTION ITEMS:, etc.) */
-    .msg-system .label {
+    /* Cold start reveal — staggered lines */
+    .cold-line {
+      opacity: 0;
+      transform: translateY(4px);
+      animation: line-in 0.3s ease forwards;
+    }
+    @keyframes line-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cold-header {
+      font-size: 13px;
+      color: var(--stone);
+      letter-spacing: 0.08em;
+      margin-bottom: 24px;
+    }
+
+    .cold-headline {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--bone);
+      line-height: 1.5;
+      margin-bottom: 32px;
+      max-width: 560px;
+    }
+    .cold-headline em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    .cold-commands {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cold-cmd-line {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+    }
+    .cold-cmd-name {
       color: var(--accent);
       font-weight: 600;
       letter-spacing: 0.06em;
+      min-width: 96px;
+    }
+    .cold-cmd-desc {
+      color: var(--stone);
     }
 
     /* Error */
     .msg-error {
       font-size: 14px;
       color: var(--error);
+      letter-spacing: 0.02em;
     }
 
-    /* Loading state */
-    .loading-line { display: flex; flex-direction: column; }
+    /* ── Loading state ───────────────────────────────────── */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
     .cursor-blink {
       display: inline-block;
       width: 10px;
-      height: 17px;
+      height: 18px;
       background: var(--accent);
       vertical-align: text-bottom;
       animation: blink 1s step-end infinite;
@@ -217,26 +419,26 @@
       0%, 100% { opacity: 1; }
       50%       { opacity: 0; }
     }
-    .processing-text {
+
+    .loading-status {
       font-size: 11px;
       color: var(--stone);
       letter-spacing: 0.08em;
-      margin-top: 10px;
       display: none;
     }
-    .processing-text.visible { display: block; }
+    .loading-status.visible { display: block; }
 
-    /* ── Input area ── */
+    /* ── Input area ──────────────────────────────────────── */
     #input-wrap {
       flex-shrink: 0;
       background: var(--surface);
       border-top: 1px solid var(--cream);
-      padding: 16px 24px 20px;
+      padding: 20px 32px 24px;
     }
 
     #input-inner {
       width: 100%;
-      max-width: 760px;
+      max-width: 800px;
       margin: 0 auto;
     }
 
@@ -248,10 +450,10 @@
 
     #input-prefix {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--accent);
-      padding-bottom: 8px;
-      padding-right: 12px;
+      padding-bottom: 10px;
+      padding-right: 14px;
       flex-shrink: 0;
       user-select: none;
       line-height: 1;
@@ -267,81 +469,106 @@
       border: none;
       border-bottom: 1px solid var(--cream);
       outline: none;
-      padding: 0 0 8px 0;
+      padding: 0 0 10px 0;
       resize: none;
-      height: 32px;
-      min-height: 32px;
-      max-height: 128px;
+      height: 36px;
+      min-height: 36px;
+      max-height: 144px;
       overflow-y: hidden;
       transition: border-color 0.15s;
       caret-color: var(--accent);
     }
     #user-input:focus { border-bottom-color: var(--accent); }
-    #user-input::placeholder { color: var(--stone); }
+    #user-input::placeholder { color: var(--stone); opacity: 0.6; }
 
     #run-btn {
       font-family: inherit;
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.10em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--bone);
       background: transparent;
       border: 1px solid var(--stone);
-      padding: 6px 16px;
+      padding: 8px 18px;
       border-radius: 2px;
       cursor: pointer;
-      margin-left: 16px;
-      margin-bottom: 2px;
+      margin-left: 20px;
+      margin-bottom: 4px;
       flex-shrink: 0;
       transition: color 0.12s, border-color 0.12s;
       white-space: nowrap;
     }
     #run-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
-    #run-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    #run-btn:disabled { opacity: 0.25; cursor: not-allowed; }
     #run-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
     #input-hint {
       font-size: 11px;
       color: var(--stone);
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       margin-top: 10px;
-      padding-left: 28px;
+      padding-left: 30px;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
+    #user-input:focus ~ #input-hint,
+    #input-wrap:focus-within #input-hint { opacity: 1; }
 
-    /* ── Responsive ── */
-    @media (max-width: 600px) {
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 640px) {
       #header { padding: 0 16px; }
-      #header-title { font-size: 12px; }
-      .cmd-btn { font-size: 9px; padding: 3px 7px; letter-spacing: 0.06em; }
-      #messages { padding: 24px 16px; }
-      #input-wrap { padding: 12px 16px 16px; }
+      #commands-row { padding: 0 16px; gap: 6px; }
+      #commands-label { display: none; }
+      .cmd-btn { font-size: 10px; padding: 5px 10px; }
+      #messages-inner { padding: 32px 16px 24px; }
+      #input-wrap { padding: 16px 16px 20px; }
+      .cold-headline { font-size: 16px; }
+      #session-label { display: none; }
     }
 
-    @media (min-width: 1024px) {
-      #messages { padding: 48px 40px; }
-      #input-wrap { padding: 20px 40px 24px; }
+    @media (min-width: 1200px) {
+      #messages-inner { padding: 56px 40px 40px; max-width: 860px; }
+      #input-wrap { padding: 24px 40px 28px; }
     }
   </style>
 </head>
 <body>
 <div id="app">
 
+  <!-- Header -->
   <header id="header" role="banner">
-    <div id="header-title">BASH v1 &nbsp;&mdash;&nbsp; <span>Jeremy Avalon LLC</span></div>
-    <nav id="header-actions" aria-label="Quick commands">
-      <button class="cmd-btn" onclick="sendCmd('BOOKINGS')" aria-label="Bookings">BOOKINGS</button>
-      <button class="cmd-btn" onclick="sendCmd('CONTENT')"  aria-label="Content">CONTENT</button>
-      <button class="cmd-btn" onclick="sendCmd('REVENUE')"  aria-label="Revenue">REVENUE</button>
-      <button class="cmd-btn" onclick="sendCmd('ADMIN')"    aria-label="Admin">ADMIN</button>
-      <button class="cmd-btn" onclick="sendCmd('OUTREACH')" aria-label="Outreach">OUTREACH</button>
-    </nav>
+    <div id="header-left">
+      <div id="header-title">BASH v1</div>
+    </div>
+    <div id="header-right">
+      <span id="session-label">SESSION 01</span>
+      <div id="status-dot" title="Connecting..."></div>
+    </div>
   </header>
 
+  <!-- Commands Row -->
+  <nav id="commands-row" aria-label="Quick commands">
+    <span id="commands-label">Commands</span>
+    <button class="cmd-btn" onclick="sendCmd('BOOKINGS')" aria-label="Bookings">BOOKINGS</button>
+    <button class="cmd-btn" onclick="sendCmd('CONTENT')"  aria-label="Content">CONTENT</button>
+    <button class="cmd-btn" onclick="sendCmd('REVENUE')"  aria-label="Revenue">REVENUE</button>
+    <button class="cmd-btn" onclick="sendCmd('ADMIN')"    aria-label="Admin">ADMIN</button>
+    <button class="cmd-btn" onclick="sendCmd('OUTREACH')" aria-label="Outreach">OUTREACH</button>
+  </nav>
+
+  <!-- Messages -->
   <main id="messages" role="main" aria-live="polite" aria-label="Conversation">
-    <div id="messages-inner"></div>
+    <div id="messages-inner">
+      <!-- Init state — shown before cold start loads -->
+      <div id="init-state">
+        <span>Initializing FounderOS</span>
+        <span class="cursor-blink" aria-hidden="true"></span>
+      </div>
+    </div>
   </main>
 
+  <!-- Input -->
   <footer id="input-wrap">
     <div id="input-inner">
       <div id="input-row">
@@ -350,18 +577,19 @@
           id="user-input"
           placeholder="type a command or question..."
           rows="1"
-          aria-label="Input"
+          aria-label="Message input"
           autocomplete="off"
           spellcheck="false"
         ></textarea>
-        <button id="run-btn" onclick="sendMessage()" disabled aria-label="Run">RUN</button>
+        <button id="run-btn" onclick="sendMessage()" disabled aria-label="Send">RUN</button>
       </div>
-      <div id="input-hint">enter to send &nbsp;&middot;&nbsp; shift+enter for new line</div>
+      <div id="input-hint">enter &nbsp;&#xb7;&nbsp; send &nbsp;&nbsp; shift+enter &nbsp;&#xb7;&nbsp; new line</div>
     </div>
   </footer>
 
 </div>
 <script>
+// ── System prompt ────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are FounderOS, the dedicated business operating system for Jeremy Avalon LLC. You exist to help Jeremy build a sustainable, scalable DJ and music performance business — starting with Atlanta, expanding nationally and internationally.
 
 ## CLIENT CONTEXT
@@ -390,79 +618,148 @@ const SYSTEM_PROMPT = `You are FounderOS, the dedicated business operating syste
 6. MUSIC HISTORIAN ANGLE: Surface this differentiator in content, outreach, and positioning whenever relevant
 
 ## RESPONSE FORMAT
-Every response must include:
+Every response must include these exact section headers:
 
 **SITUATION:** One-line read of where things stand
-**ACTION ITEMS:** 3-5 specific, executable tasks with clear owners and deadlines
+**ACTION ITEMS:** 3-5 specific, executable tasks with clear owners and deadlines (use numbered list)
 **METRICS:** How to measure progress
 **NEXT SESSION:** What to focus on next time
 
 ## COLD START
-On first message (any content), output exactly:
+On first message (any content), output exactly this and nothing else:
 
----
-FounderOS loaded for Jeremy Avalon LLC — jeremy-avalon
+FounderOS loaded — jeremy-avalon
 
 You have 13K on Instagram and 7K on TikTok — and 1-3 bookings a month. The audience is there. The pipeline is not. Today we fix that.
 
-Commands:
-  BOOKINGS  — close something this week
-  CONTENT   — build a 4-week calendar that works
-  REVENUE   — find the money you are leaving on the table
-  ADMIN     — reclaim 5 hours a week with a real system
-  OUTREACH  — build your Atlanta venue list and start sending
----`;
+BOOKINGS — close something this week
+CONTENT — build a 4-week calendar that works
+REVENUE — find the money you are leaving on the table
+ADMIN — reclaim 5 hours a week with a real system
+OUTREACH — build your Atlanta venue list and start sending`;
 
-// ── Lightweight markdown renderer ──────────────────────────────────────
-function renderMarkdown(text) {
-  // Escape HTML first
+// ── State ────────────────────────────────────────────────────────────────
+let messages  = [];
+let isLoading = false;
+let sessionNum = 1;
+
+const innerEl   = document.getElementById('messages-inner');
+const msgsEl    = document.getElementById('messages');
+const inputEl   = document.getElementById('user-input');
+const runBtn    = document.getElementById('run-btn');
+const statusDot = document.getElementById('status-dot');
+const initEl    = document.getElementById('init-state');
+
+// ── Session counter (persisted) ──────────────────────────────────────────
+try {
+  sessionNum = parseInt(localStorage.getItem('bash_session') || '0', 10) + 1;
+  localStorage.setItem('bash_session', sessionNum);
+} catch(e) {}
+document.getElementById('session-label').textContent =
+  'SESSION ' + String(sessionNum).padStart(2, '0');
+
+// ── Timestamp ────────────────────────────────────────────────────────────
+function getTimestamp() {
+  const now = new Date();
+  const mo = String(now.getMonth()+1).padStart(2,'0');
+  const dy = String(now.getDate()).padStart(2,'0');
+  const yr = String(now.getFullYear()).slice(-2);
+  let h = now.getHours(), ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  const min = String(now.getMinutes()).padStart(2,'0');
+  return `${mo}.${dy}.${yr} · ${h}:${min} ${ampm}`;
+}
+
+// ── Markdown / section renderer ──────────────────────────────────────────
+// Detects OPE structured sections and renders each with a tag chip.
+// Falls back to generic markdown for unstructured text.
+
+const SECTION_KEYS = ['SITUATION', 'ACTION ITEMS', 'METRICS', 'NEXT SESSION'];
+
+function renderSections(text) {
+  // Build regex to split on **SECTION:** markers
+  const sectionRe = /\*\*(SITUATION|ACTION ITEMS|METRICS|NEXT SESSION):\*\*/gi;
+
+  const parts = text.split(sectionRe);
+
+  // If no sections found, render as plain markdown
+  if (parts.length <= 1) return renderGeneric(text);
+
+  let html = '';
+  let i = 0;
+
+  // Content before first section (if any)
+  if (parts[0].trim()) {
+    html += `<div class="section-body">${renderGeneric(parts[0].trim())}</div>`;
+  }
+  i = 1;
+
+  while (i < parts.length) {
+    const label = parts[i];        // e.g. "SITUATION"
+    const body  = parts[i+1] || '';
+    html += `<div class="response-section">
+      <div class="section-tag">${label}</div>
+      <div class="section-body">${renderGeneric(body.trim())}</div>
+    </div>`;
+    i += 2;
+  }
+
+  return html;
+}
+
+function renderGeneric(text) {
+  if (!text) return '';
+
+  // Escape HTML
   let html = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-  // Horizontal rule
-  html = html.replace(/^---+$/gm, '<hr>');
-
-  // Fenced code blocks
-  html = html.replace(/```[\s\S]*?```/g, (m) => {
-    const inner = m.replace(/^```[^\n]*\n?/, '').replace(/```$/, '');
-    return `<pre><code>${inner}</code></pre>`;
+  // Fenced code blocks first
+  html = html.replace(/```[\s\S]*?```/g, m => {
+    const inner = m.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '');
+    return `\x00PRE\x00${encodeURIComponent(inner)}\x00/PRE\x00`;
   });
 
-  // Bold: **text**
+  // Horizontal rules
+  html = html.replace(/^[ \t]*---+[ \t]*$/gm, '\x00HR\x00');
+
+  // Bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-  // Italic: *text* (single)
-  html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
-
   // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
 
-  // Unordered lists — collect consecutive lines starting with - or *
-  html = html.replace(/((?:^[ \t]*[-*] .+\n?)+)/gm, (block) => {
-    const items = block.trim().split('\n').map(l => {
-      const content = l.replace(/^[ \t]*[-*] /, '');
-      return `<li>${content}</li>`;
-    }).join('');
-    return `<ul>${items}</ul>`;
+  // Ordered lists (numbered)
+  html = html.replace(/((?:^[ \t]*\d+\.[ \t].+(?:\n|$))+)/gm, block => {
+    const items = block.trim().split('\n').map(l =>
+      `<li>${l.replace(/^[ \t]*\d+\.[ \t]/, '')}</li>`
+    ).join('');
+    return `\x00OL\x00${items}\x00/OL\x00`;
   });
 
-  // Ordered lists
-  html = html.replace(/((?:^[ \t]*\d+\. .+\n?)+)/gm, (block) => {
-    const items = block.trim().split('\n').map(l => {
-      const content = l.replace(/^[ \t]*\d+\. /, '');
-      return `<li>${content}</li>`;
-    }).join('');
-    return `<ol>${items}</ol>`;
+  // Unordered lists
+  html = html.replace(/((?:^[ \t]*[-*][ \t].+(?:\n|$))+)/gm, block => {
+    const items = block.trim().split('\n').map(l =>
+      `<li>${l.replace(/^[ \t]*[-*][ \t]/, '')}</li>`
+    ).join('');
+    return `\x00UL\x00${items}\x00/UL\x00`;
   });
 
-  // Paragraphs — wrap blocks of text separated by blank lines
+  // Restore placeholders
+  html = html
+    .replace(/\x00PRE\x00(.*?)\x00\/PRE\x00/g, (_, enc) =>
+      `<pre><code>${decodeURIComponent(enc)}</code></pre>`)
+    .replace(/\x00HR\x00/g, '<hr>')
+    .replace(/\x00OL\x00([\s\S]*?)\x00\/OL\x00/g, '<ol>$1</ol>')
+    .replace(/\x00UL\x00([\s\S]*?)\x00\/UL\x00/g, '<ul>$1</ul>');
+
+  // Paragraphs
   html = html.split(/\n{2,}/).map(block => {
     block = block.trim();
     if (!block) return '';
     if (/^<(ul|ol|pre|hr|li)/.test(block)) return block;
-    // Preserve single line breaks within a paragraph
     block = block.replace(/\n/g, '<br>');
     return `<p>${block}</p>`;
   }).join('\n');
@@ -470,16 +767,66 @@ function renderMarkdown(text) {
   return html;
 }
 
-// ── State ───────────────────────────────────────────────────────────────
-let messages  = [];
-let isLoading = false;
+// ── Cold start renderer ──────────────────────────────────────────────────
+function renderColdStart(text) {
+  // Parse the known cold start structure
+  const lines = text.split('\n').filter(l => l.trim());
 
-const innerEl = document.getElementById('messages-inner');
-const msgsEl  = document.getElementById('messages');
-const inputEl = document.getElementById('user-input');
-const runBtn  = document.getElementById('run-btn');
+  const container = document.createElement('div');
+  container.className = 'msg-system';
 
-// ── DOM helpers ─────────────────────────────────────────────────────────
+  let delay = 80;
+  const step = 120;
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    let el;
+
+    // Header line: "FounderOS loaded — ..."
+    if (idx === 0) {
+      el = document.createElement('div');
+      el.className = 'cold-header cold-line';
+      el.textContent = trimmed;
+    }
+    // Headline: "You have..."
+    else if (trimmed.startsWith('You have')) {
+      el = document.createElement('div');
+      el.className = 'cold-headline cold-line';
+      // Emphasize "The audience is there. The pipeline is not."
+      const highlighted = trimmed.replace(
+        /(The audience is there\. The pipeline is not\.)/,
+        '<em>$1</em>'
+      );
+      el.innerHTML = highlighted;
+    }
+    // Command lines: "WORD — description"
+    else if (/^[A-Z\s]+\s*—/.test(trimmed)) {
+      const [cmd, ...rest] = trimmed.split('—');
+      el = document.createElement('div');
+      el.className = 'cold-commands cold-line';
+      el.innerHTML = `<div class="cold-cmd-line">
+        <span class="cold-cmd-name">${cmd.trim()}</span>
+        <span class="cold-cmd-desc">— ${rest.join('—').trim()}</span>
+      </div>`;
+    }
+    else {
+      el = document.createElement('p');
+      el.className = 'cold-line';
+      el.textContent = trimmed;
+    }
+
+    el.style.animationDelay = delay + 'ms';
+    delay += step;
+
+    container.appendChild(el);
+  });
+
+  return container;
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────────
 function createExchange(userText, hiddenUser) {
   const ex = document.createElement('div');
   ex.className = 'exchange';
@@ -492,22 +839,57 @@ function createExchange(userText, hiddenUser) {
   return ex;
 }
 
-function appendSystemMsg(exchange, text, isError) {
-  const div = document.createElement('div');
+function appendSystemMsg(exchange, text, isError, isColdStart) {
   if (isError) {
+    const div = document.createElement('div');
     div.className = 'msg-error';
     div.textContent = text;
-  } else {
-    div.className = 'msg-system';
-    div.innerHTML = renderMarkdown(text);
+    exchange.appendChild(div);
+    scroll();
+    return;
   }
-  exchange.appendChild(div);
+
+  // Response meta (timestamp + copy)
+  const meta = document.createElement('div');
+  meta.className = 'response-meta';
+
+  const ts = document.createElement('span');
+  ts.textContent = getTimestamp();
+  meta.appendChild(ts);
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'copy-btn';
+  copyBtn.textContent = 'COPY';
+  copyBtn.setAttribute('aria-label', 'Copy response');
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.textContent = 'COPIED';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'COPY';
+        copyBtn.classList.remove('copied');
+      }, 2000);
+    });
+  });
+  meta.appendChild(copyBtn);
+
+  exchange.appendChild(meta);
+
+  if (isColdStart) {
+    exchange.appendChild(renderColdStart(text));
+  } else {
+    const div = document.createElement('div');
+    div.className = 'msg-system';
+    div.innerHTML = renderSections(text);
+    exchange.appendChild(div);
+  }
+
   scroll();
 }
 
 function appendLoading(exchange) {
   const wrap = document.createElement('div');
-  wrap.className = 'loading-line';
+  wrap.className = 'loading-wrap';
   wrap.id = 'loading-wrap';
 
   const cursor = document.createElement('span');
@@ -515,28 +897,41 @@ function appendLoading(exchange) {
   cursor.setAttribute('aria-hidden', 'true');
   wrap.appendChild(cursor);
 
-  const proc = document.createElement('div');
-  proc.className = 'processing-text';
-  proc.textContent = 'Processing...';
-  wrap.appendChild(proc);
+  const status = document.createElement('div');
+  status.className = 'loading-status';
+  status.id = 'loading-status';
+  wrap.appendChild(status);
 
   exchange.appendChild(wrap);
   scroll();
-  setTimeout(() => proc.classList.add('visible'), 400);
+
+  // Progressive status messages
+  const t1 = setTimeout(() => {
+    status.textContent = 'Processing...';
+    status.classList.add('visible');
+  }, 500);
+  const t2 = setTimeout(() => {
+    status.textContent = 'Still thinking...';
+  }, 3500);
+
+  wrap._timers = [t1, t2];
   return wrap;
 }
 
 function removeLoading() {
   const el = document.getElementById('loading-wrap');
-  if (el) el.remove();
+  if (el) {
+    if (el._timers) el._timers.forEach(clearTimeout);
+    el.remove();
+  }
 }
 
 function scroll() {
-  msgsEl.scrollTop = msgsEl.scrollHeight;
+  requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
 }
 
-// ── API call ────────────────────────────────────────────────────────────
-async function callClaude(userText, hiddenUser) {
+// ── API call ─────────────────────────────────────────────────────────────
+async function callClaude(userText, hiddenUser, isColdStart) {
   messages.push({ role: 'user', content: userText });
 
   const exchange = createExchange(userText, hiddenUser);
@@ -565,11 +960,17 @@ async function callClaude(userText, hiddenUser) {
     messages.push({ role: 'assistant', content: reply });
 
     removeLoading();
-    appendSystemMsg(exchange, reply, false);
+    appendSystemMsg(exchange, reply, false, isColdStart);
+
+    if (isColdStart) {
+      statusDot.classList.add('live');
+      statusDot.title = 'Connected';
+    }
   } catch (err) {
     messages.pop();
     removeLoading();
-    appendSystemMsg(exchange, 'Error: ' + err.message, true);
+    appendSystemMsg(exchange, 'Error: ' + err.message, true, false);
+    statusDot.title = 'Error';
   }
 
   isLoading = false;
@@ -577,15 +978,15 @@ async function callClaude(userText, hiddenUser) {
   inputEl.focus();
 }
 
-// ── Send ────────────────────────────────────────────────────────────────
+// ── Send ─────────────────────────────────────────────────────────────────
 async function sendMessage() {
   if (isLoading) return;
   const text = inputEl.value.trim();
   if (!text) return;
   inputEl.value = '';
-  inputEl.style.height = '32px';
+  inputEl.style.height = '36px';
   runBtn.disabled = true;
-  await callClaude(text, false);
+  await callClaude(text, false, false);
 }
 
 function sendCmd(cmd) {
@@ -594,8 +995,8 @@ function sendCmd(cmd) {
   sendMessage();
 }
 
-// ── Input behaviour ─────────────────────────────────────────────────────
-inputEl.addEventListener('keydown', (e) => {
+// ── Input events ─────────────────────────────────────────────────────────
+inputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
@@ -603,15 +1004,19 @@ inputEl.addEventListener('keydown', (e) => {
 });
 
 inputEl.addEventListener('input', () => {
-  inputEl.style.height = '32px';
-  const sh = Math.min(inputEl.scrollHeight, 128);
+  inputEl.style.height = '36px';
+  const sh = Math.min(inputEl.scrollHeight, 144);
   inputEl.style.height = sh + 'px';
-  inputEl.style.overflow = inputEl.scrollHeight > 128 ? 'auto' : 'hidden';
+  inputEl.style.overflow = inputEl.scrollHeight > 144 ? 'auto' : 'hidden';
   runBtn.disabled = inputEl.value.trim().length === 0 || isLoading;
 });
 
-// ── Boot — cold start is silent (user never sees "load") ────────────────
-callClaude('load', true);
+// ── Boot ─────────────────────────────────────────────────────────────────
+(async () => {
+  await callClaude('load', true, true);
+  // Hide init state after cold start loads
+  initEl.classList.add('hidden');
+})();
 </script>
 </body>
 </html>
