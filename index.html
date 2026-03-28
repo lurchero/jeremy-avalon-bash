@@ -3,221 +3,616 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BASH &#8212; Jeremy Avalon LLC</title>
+  <title>BASH — Jeremy Avalon LLC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     :root {
-      --black:        #0A0A0A;
-      --surface:      #111111;
-      --elevated:     #1A1A1A;
-      --bone:         #F5F0EB;
-      --stone:        #8C8378;
-      --cream:        #E8E0D6;
-      --accent:       #C4A46C;
-      --accent-hover: #B8964E;
-      --error:        #B54040;
+      --black:       #0A0A0A;
+      --surface:     #111111;
+      --surface2:    #181818;
+      --line:        #222222;
+      --muted:       #8C8378;
+      --text:        #C8BFB5;
+      --bone:        #F5F0EB;
+      --accent:      #C4A46C;
+      --accent-dim:  rgba(196,164,108,0.10);
+      --accent-rgb:  196,164,108;
+      --amber:       #D4943C;
+      --amber-dim:   rgba(212,148,60,0.10);
+      --error:       #B54040;
+      --error-dim:   rgba(181,64,64,0.10);
     }
 
-    html, body {
-      height: 100%;
+    html { scroll-behavior: smooth; }
+
+    body {
       background: var(--black);
-      color: var(--bone);
+      color: var(--text);
       font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 16px;
-      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 15px;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: var(--black); }
-    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 0; }
+    ::-webkit-scrollbar { width: 0; }
 
-    /* ── Layout ─────────────────────────────────────────── */
-    #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
-    /* ── Header ─────────────────────────────────────────── */
-    #header {
+    /* ── Topbar ─────────────────────────────────────────── */
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
-      height: 48px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--cream);
-      flex-shrink: 0;
+      padding: 20px 24px 16px;
+      position: sticky;
+      top: 0;
+      background: var(--black);
+      z-index: 100;
+      border-bottom: 1px solid var(--line);
     }
 
-    #header-left {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    #header-title {
-      font-size: 13px;
-      font-weight: 600;
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 0.10em;
       color: var(--bone);
-      letter-spacing: 0.04em;
-      white-space: nowrap;
     }
 
-    #header-right {
+    .topbar-right {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    #session-label {
-      font-size: 11px;
-      color: var(--stone);
-      letter-spacing: 0.10em;
-      white-space: nowrap;
-    }
-
-    #status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--stone);
-      transition: background 0.3s;
-      flex-shrink: 0;
-    }
-    #status-dot.live { background: var(--accent); }
-
-    /* ── Commands Row ───────────────────────────────────── */
-    #commands-row {
+    .live-indicator {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 0 32px;
-      height: 40px;
-      background: var(--black);
-      border-bottom: 1px solid var(--elevated);
-      flex-shrink: 0;
-      overflow-x: auto;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    #commands-row::-webkit-scrollbar { display: none; }
-
-    #commands-label {
-      font-size: 10px;
-      color: var(--stone);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      margin-right: 8px;
-      flex-shrink: 0;
     }
 
-    .cmd-btn {
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-      color: var(--stone);
-      background: transparent;
-      border: 1px solid var(--elevated);
-      padding: 5px 14px;
-      border-radius: 2px;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: color 0.12s, border-color 0.12s, background 0.12s;
-      min-height: 28px;
-      display: flex;
-      align-items: center;
-    }
-    .cmd-btn:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(196, 164, 108, 0.04);
-    }
-    .cmd-btn:active { opacity: 0.7; }
-    .cmd-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
-
-    /* ── Messages ───────────────────────────────────────── */
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0;
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: livePulse 2.5s infinite, dotGlow 2.5s infinite;
     }
 
-    #messages-inner {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 48px 32px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
     }
 
-    /* ── Init state ─────────────────────────────────────── */
-    #init-state {
+    @keyframes dotGlow {
+      0%   { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.6); }
+      50%  { box-shadow: 0 0 0 7px rgba(var(--accent-rgb), 0); }
+      100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+    }
+
+    .live-time {
       font-size: 13px;
-      color: var(--stone);
-      letter-spacing: 0.06em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    #init-state.hidden { display: none; }
-
-    /* ── Exchange block ─────────────────────────────────── */
-    .exchange {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .exchange + .exchange {
-      margin-top: 48px;
-      padding-top: 48px;
-      border-top: 1px solid var(--elevated);
+    /* ── Hero ───────────────────────────────────────────── */
+    .hero {
+      padding: 28px 24px 24px;
+      border-bottom: 1px solid var(--line);
+      animation: riseIn 0.4s ease both;
     }
 
-    /* User line */
-    .msg-user {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--bone);
-      margin-bottom: 24px;
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-    }
-    .msg-user::before {
-      content: '>';
+    .hero-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
       color: var(--accent);
-      font-weight: 700;
-      font-size: 14px;
-      flex-shrink: 0;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding: 4px 10px;
+      background: var(--accent-dim);
+      border-radius: 2px;
     }
-    .msg-user.hidden { display: none; }
 
-    /* System response wrapper */
-    .msg-system {
-      font-size: 15px;
-      line-height: 1.85;
+    .hero-headline {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 30px;
       color: var(--bone);
-      word-break: break-word;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      animation: heroReveal 0.7s ease both;
+      animation-delay: 0.1s;
     }
 
-    /* Response timestamp */
-    .response-meta {
-      font-size: 11px;
-      color: var(--stone);
+    .hero-headline em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-body {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.7;
+      max-width: 480px;
+    }
+
+    .hero-body strong { color: var(--bone); font-weight: 500; }
+
+    /* ── Today's Move ────────────────────────────────────── */
+    .today-move {
+      margin: 16px 24px 0;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      animation: riseIn 0.45s ease both, borderPulse 3s ease 0.8s 2;
+      animation-delay: 0.05s;
+      position: relative;
+    }
+
+    .today-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .today-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 19px;
+      color: var(--bone);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .today-desc {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+
+    .today-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: var(--bone);
+      border: none;
+      border-radius: 4px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--black);
+      cursor: pointer;
       letter-spacing: 0.08em;
-      margin-bottom: 20px;
+      text-transform: uppercase;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s ease, box-shadow 0.3s ease;
+    }
+
+    .today-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .today-btn:hover::after { opacity: 1; }
+    .today-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(var(--accent-rgb), 0.18); }
+    .today-btn:active { transform: scale(0.97); box-shadow: none; }
+
+    /* ── Section header ─────────────────────────────────── */
+    .section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 26px 24px 12px;
+    }
+
+    .section-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Revenue Progress ───────────────────────────────── */
+    .progress-block {
+      margin: 0 24px;
+      animation: riseIn 0.5s ease both;
+      animation-delay: 0.1s;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .progress-current {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 28px;
+      color: var(--bone);
+    }
+
+    .progress-target {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .progress-target strong { color: var(--accent); font-weight: 600; }
+
+    .bar-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 0;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--amber), var(--accent));
+      border-radius: 0;
+      width: 0%;
+      transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 2px 0 14px rgba(var(--accent-rgb), 0.45);
+    }
+
+    .bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; bottom: 0;
+      width: 60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+      animation: shimmer 2.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .prog-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .prog-label.active { color: var(--accent); font-weight: 500; }
+    .prog-label.win-label { color: var(--accent); }
+
+    /* ── Milestone grid ─────────────────────────────────── */
+    .unlocks {
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      animation: riseIn 0.5s ease both;
+      animation-delay: 0.12s;
+    }
+
+    .unlock-card {
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .unlock-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.12);
+    }
+
+    .unlock-card.is-win {
+      border-color: rgba(var(--accent-rgb), 0.25);
+      background: var(--accent-dim);
+      animation: riseIn 0.5s ease both, winPulse 4s ease 1s infinite;
+    }
+
+    @keyframes winPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+      50%       { box-shadow: 0 0 18px 0 rgba(var(--accent-rgb), 0.14); }
+    }
+
+    .unlock-at {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--amber);
+      margin-bottom: 5px;
+    }
+
+    .unlock-card.is-win .unlock-at { color: var(--accent); }
+
+    .unlock-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bone);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .unlock-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* ── Priority moves ─────────────────────────────────── */
+    .moves-list {
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .move-card {
+      padding: 18px 18px 18px 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      animation: riseIn 0.5s ease both;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .move-card::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+
+    .move-card.now::after    { background: var(--accent); }
+    .move-card.building::after { background: var(--amber); }
+    .move-card.queued::after  { background: var(--muted); }
+
+    .move-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.10);
+      border-color: rgba(var(--accent-rgb), 0.18);
+    }
+
+    .move-card:active { background: var(--surface2); }
+
+    .move-body { flex: 1; min-width: 0; }
+
+    .move-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--bone);
+      margin-bottom: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    .move-action {
+      font-size: 12px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .move-right { text-align: right; flex-shrink: 0; }
+
+    .move-revenue {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .move-status {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 2px;
+      display: inline-block;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .status-now   { background: var(--accent-dim);  color: var(--accent); }
+    .status-build { background: var(--amber-dim);   color: var(--amber); }
+    .status-queue { background: rgba(140,131,120,0.12); color: var(--muted); }
+
+    /* ── Quick command chips ─────────────────────────────── */
+    .triggers-wrap {
+      padding: 0 24px 8px;
+      overflow-x: auto;
+      display: flex;
+      gap: 8px;
+      scrollbar-width: none;
+    }
+    .triggers-wrap::-webkit-scrollbar { display: none; }
+
+    .chip {
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 9px 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.16);
+      border-color: rgba(var(--accent-rgb), 0.3);
+      color: var(--bone);
+    }
+
+    .chip:active { transform: scale(0.97); }
+
+    /* ── AI Response area ───────────────────────────────── */
+    .response-outer {
+      margin: 0 24px 8px;
+      display: none;
+    }
+
+    .response-outer.visible {
+      display: block;
+      animation: slideReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideReveal {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .response-area {
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+      border-radius: 4px;
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.05);
+    }
+
+    .response-tag {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .response-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    /* Section rendering */
+    .r-section { margin-bottom: 20px; }
+    .r-section:last-child { margin-bottom: 0; }
+
+    .r-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 2px 7px;
+      border-radius: 2px;
+      margin-bottom: 8px;
+    }
+
+    .r-body {
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .r-body p { margin-bottom: 8px; }
+    .r-body p:last-child { margin-bottom: 0; }
+    .r-body strong { color: var(--bone); font-weight: 600; }
+
+    .r-body ol {
+      list-style: none; padding: 0; margin: 0;
+      counter-reset: r-counter;
+    }
+    .r-body ol li {
+      counter-increment: r-counter;
+      display: flex; gap: 12px;
+      margin-bottom: 10px; align-items: baseline;
+    }
+    .r-body ol li::before {
+      content: counter(r-counter, decimal-leading-zero) '.';
+      color: var(--accent);
+      font-weight: 700; font-size: 11px;
+      letter-spacing: 0.04em;
+      flex-shrink: 0; min-width: 22px;
+    }
+
+    .r-body ul { list-style: none; padding: 0; margin: 0; }
+    .r-body ul li { display: flex; gap: 10px; margin-bottom: 6px; align-items: baseline; }
+    .r-body ul li::before { content: '—'; color: var(--muted); flex-shrink: 0; }
+
+    .r-body code {
+      background: var(--surface2);
+      padding: 1px 5px; border-radius: 2px; font-size: 12px;
+    }
+
+    .r-body pre {
+      background: var(--surface2);
+      padding: 14px 16px; border-radius: 2px;
+      overflow-x: auto; margin: 10px 0;
+      font-size: 12px; line-height: 1.6;
+      border-left: 2px solid var(--accent);
+    }
+    .r-body pre code { background: none; padding: 0; }
+    .r-body hr { border: none; border-top: 1px solid var(--line); margin: 14px 0; }
+
+    /* Response meta */
+    .response-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .response-ts {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
     }
 
     .copy-btn {
@@ -225,196 +620,31 @@
       font-size: 10px;
       letter-spacing: 0.10em;
       text-transform: uppercase;
-      color: var(--stone);
+      color: var(--muted);
       background: transparent;
       border: none;
       cursor: pointer;
       padding: 2px 0;
-      opacity: 0;
-      transition: opacity 0.15s, color 0.12s;
+      transition: color 0.12s;
     }
-    .exchange:hover .copy-btn { opacity: 1; }
     .copy-btn:hover { color: var(--accent); }
-    .copy-btn.copied { color: var(--accent); opacity: 1; }
+    .copy-btn.copied { color: var(--accent); }
 
-    /* ── Section rendering ──────────────────────────────── */
-    .response-section {
-      margin-bottom: 24px;
-    }
-    .response-section:last-child { margin-bottom: 0; }
-
-    .section-tag {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--stone);
-      border: 1px solid var(--elevated);
-      padding: 2px 8px;
-      border-radius: 2px;
-      margin-bottom: 10px;
-    }
-
-    .section-body {
-      color: var(--bone);
-      font-size: 15px;
-      line-height: 1.85;
-    }
-
-    /* Plain paragraphs */
-    .section-body p { margin-bottom: 10px; }
-    .section-body p:last-child { margin-bottom: 0; }
-
-    /* Bold within section body */
-    .section-body strong {
-      color: var(--bone);
-      font-weight: 600;
-    }
-
-    /* Action items — numbered list */
-    .section-body ol {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      counter-reset: action-counter;
-    }
-    .section-body ol li {
-      counter-increment: action-counter;
-      display: flex;
-      gap: 14px;
-      margin-bottom: 12px;
-      align-items: baseline;
-    }
-    .section-body ol li::before {
-      content: counter(action-counter, decimal-leading-zero) '.';
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 0.04em;
-      flex-shrink: 0;
-      min-width: 24px;
-    }
-
-    /* Unordered lists */
-    .section-body ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .section-body ul li {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 8px;
-      align-items: baseline;
-    }
-    .section-body ul li::before {
-      content: '—';
-      color: var(--stone);
-      flex-shrink: 0;
-    }
-
-    /* Inline code */
-    .section-body code {
-      background: var(--elevated);
-      padding: 1px 6px;
-      border-radius: 2px;
-      font-size: 13px;
-    }
-
-    /* Code block */
-    .section-body pre {
-      background: var(--elevated);
-      padding: 16px 20px;
-      border-radius: 2px;
-      overflow-x: auto;
-      margin: 12px 0;
-      font-size: 13px;
-      line-height: 1.6;
-      border-left: 2px solid var(--accent);
-    }
-    .section-body pre code { background: none; padding: 0; }
-
-    /* HR */
-    .section-body hr {
-      border: none;
-      border-top: 1px solid var(--elevated);
-      margin: 16px 0;
-    }
-
-    /* Cold start reveal — staggered lines */
-    .cold-line {
-      opacity: 0;
-      transform: translateY(4px);
-      animation: line-in 0.3s ease forwards;
-    }
-    @keyframes line-in {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .cold-header {
-      font-size: 13px;
-      color: var(--stone);
-      letter-spacing: 0.08em;
-      margin-bottom: 24px;
-    }
-
-    .cold-headline {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--bone);
-      line-height: 1.5;
-      margin-bottom: 32px;
-      max-width: 560px;
-    }
-    .cold-headline em {
-      color: var(--accent);
-      font-style: normal;
-    }
-
-    .cold-commands {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .cold-cmd-line {
-      display: flex;
-      gap: 16px;
-      font-size: 13px;
-    }
-    .cold-cmd-name {
-      color: var(--accent);
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      min-width: 96px;
-    }
-    .cold-cmd-desc {
-      color: var(--stone);
-    }
-
-    /* Error */
-    .msg-error {
-      font-size: 14px;
-      color: var(--error);
-      letter-spacing: 0.02em;
-    }
-
-    /* ── Loading state ───────────────────────────────────── */
+    /* Loading within response area */
     .loading-wrap {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      padding-top: 4px;
     }
 
     .cursor-blink {
       display: inline-block;
-      width: 10px;
-      height: 18px;
+      width: 9px; height: 16px;
       background: var(--accent);
       vertical-align: text-bottom;
       animation: blink 1s step-end infinite;
     }
+
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0; }
@@ -422,172 +652,300 @@
 
     .loading-status {
       font-size: 11px;
-      color: var(--stone);
+      color: var(--muted);
       letter-spacing: 0.08em;
       display: none;
     }
     .loading-status.visible { display: block; }
 
-    /* ── Input area ──────────────────────────────────────── */
-    #input-wrap {
-      flex-shrink: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--cream);
-      padding: 20px 32px 24px;
+    /* ── Command zone ────────────────────────────────────── */
+    .command-zone {
+      padding: 14px 24px 20px;
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(to top, var(--black) 70%, transparent);
+      padding-top: 40px;
     }
 
-    #input-inner {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
+    .command-hint {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
     }
 
-    #input-row {
+    .command-row {
       display: flex;
-      align-items: flex-end;
-      gap: 0;
+      gap: 8px;
     }
 
-    #input-prefix {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--accent);
-      padding-bottom: 10px;
-      padding-right: 14px;
-      flex-shrink: 0;
-      user-select: none;
-      line-height: 1;
-    }
-
-    #user-input {
+    .command-input {
       flex: 1;
-      font-family: inherit;
-      font-size: 16px;
-      line-height: 1.5;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
       color: var(--bone);
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--cream);
       outline: none;
-      padding: 0 0 10px 0;
-      resize: none;
-      height: 36px;
-      min-height: 36px;
-      max-height: 144px;
-      overflow-y: hidden;
-      transition: border-color 0.15s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       caret-color: var(--accent);
     }
-    #user-input:focus { border-bottom-color: var(--accent); }
-    #user-input::placeholder { color: var(--stone); opacity: 0.6; }
 
-    #run-btn {
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--bone);
-      background: transparent;
-      border: 1px solid var(--stone);
-      padding: 8px 18px;
-      border-radius: 2px;
+    .command-input::placeholder { color: var(--muted); opacity: 0.6; }
+
+    .command-input:focus {
+      border-color: rgba(var(--accent-rgb), 0.4);
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.07);
+    }
+
+    .command-run {
+      background: var(--bone);
+      border: none;
+      border-radius: 4px;
+      padding: 0 22px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--black);
       cursor: pointer;
-      margin-left: 20px;
-      margin-bottom: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: opacity 0.15s, transform 0.15s;
       flex-shrink: 0;
-      transition: color 0.12s, border-color 0.12s;
-      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
     }
-    #run-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
-    #run-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-    #run-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
-    #input-hint {
-      font-size: 11px;
-      color: var(--stone);
-      letter-spacing: 0.04em;
-      margin-top: 10px;
-      padding-left: 30px;
+    .command-run::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity 0.3s;
+      pointer-events: none;
     }
-    #user-input:focus ~ #input-hint,
-    #input-wrap:focus-within #input-hint { opacity: 1; }
+
+    .command-run:hover::after { opacity: 1; }
+    .command-run:hover { transform: translateY(-1px); }
+    .command-run:active { transform: scale(0.97); opacity: 0.85; }
+    .command-run:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* ── Ripple ─────────────────────────────────────────── */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transform: scale(0);
+      animation: rippleAnim 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes rippleAnim {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ── Animations ─────────────────────────────────────── */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes heroReveal {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes borderPulse {
+      0%, 100% { border-color: var(--line); box-shadow: none; }
+      50%       { border-color: rgba(var(--accent-rgb), 0.5); box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.08); }
+    }
+
+    /* ── Spacer at bottom ───────────────────────────────── */
+    .bottom-spacer { height: 16px; }
 
     /* ── Responsive ─────────────────────────────────────── */
-    @media (max-width: 640px) {
-      #header { padding: 0 16px; }
-      #commands-row { padding: 0 16px; gap: 6px; }
-      #commands-label { display: none; }
-      .cmd-btn { font-size: 10px; padding: 5px 10px; }
-      #messages-inner { padding: 32px 16px 24px; }
-      #input-wrap { padding: 16px 16px 20px; }
-      .cold-headline { font-size: 16px; }
-      #session-label { display: none; }
-    }
-
-    @media (min-width: 1200px) {
-      #messages-inner { padding: 56px 40px 40px; max-width: 860px; }
-      #input-wrap { padding: 24px 40px 28px; }
+    @media (max-width: 480px) {
+      .hero-headline { font-size: 24px; }
+      .today-title { font-size: 17px; }
+      .progress-current { font-size: 24px; }
     }
   </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- Header -->
-  <header id="header" role="banner">
-    <div id="header-left">
-      <div id="header-title">BASH v1</div>
-    </div>
-    <div id="header-right">
-      <span id="session-label">SESSION 01</span>
-      <div id="status-dot" title="Connecting..."></div>
-    </div>
-  </header>
-
-  <!-- Commands Row -->
-  <nav id="commands-row" aria-label="Quick commands">
-    <span id="commands-label">Commands</span>
-    <button class="cmd-btn" onclick="sendCmd('BOOKINGS')" aria-label="Bookings">BOOKINGS</button>
-    <button class="cmd-btn" onclick="sendCmd('CONTENT')"  aria-label="Content">CONTENT</button>
-    <button class="cmd-btn" onclick="sendCmd('REVENUE')"  aria-label="Revenue">REVENUE</button>
-    <button class="cmd-btn" onclick="sendCmd('ADMIN')"    aria-label="Admin">ADMIN</button>
-    <button class="cmd-btn" onclick="sendCmd('OUTREACH')" aria-label="Outreach">OUTREACH</button>
-  </nav>
-
-  <!-- Messages -->
-  <main id="messages" role="main" aria-live="polite" aria-label="Conversation">
-    <div id="messages-inner">
-      <!-- Init state — shown before cold start loads -->
-      <div id="init-state">
-        <span>Initializing FounderOS</span>
-        <span class="cursor-blink" aria-hidden="true"></span>
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="logo">BASH</div>
+    <div class="topbar-right">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <div class="live-time" id="timeDisplay">--:--</div>
       </div>
     </div>
-  </main>
+  </div>
 
-  <!-- Input -->
-  <footer id="input-wrap">
-    <div id="input-inner">
-      <div id="input-row">
-        <span id="input-prefix" aria-hidden="true">&gt;</span>
-        <textarea
-          id="user-input"
-          placeholder="type a command or question..."
-          rows="1"
-          aria-label="Message input"
-          autocomplete="off"
-          spellcheck="false"
-        ></textarea>
-        <button id="run-btn" onclick="sendMessage()" disabled aria-label="Send">RUN</button>
-      </div>
-      <div id="input-hint">enter &nbsp;&#xb7;&nbsp; send &nbsp;&nbsp; shift+enter &nbsp;&#xb7;&nbsp; new line</div>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">FounderOS Active</div>
+    <h1 class="hero-headline">13K followers.<br><em>1-3 bookings.</em><br>The system is the gap.</h1>
+    <p class="hero-body">The audience is already there. Instagram 13K, TikTok 7K, website with EPK. What's missing is a repeatable pipeline — from post to pitch to paid booking. <strong>That's what we're building.</strong></p>
+  </div>
+
+  <!-- Today's Move -->
+  <div class="today-move">
+    <div class="today-label">Your move right now</div>
+    <h2 class="today-title">Build your Atlanta venue list today.</h2>
+    <p class="today-desc">Pull 10 venues from Atlanta's event circuit — bars, rooftops, private event spaces. Find the booking contact for each. You don't pitch until the list is built. That's the first 30 minutes.</p>
+    <button class="today-btn" onclick="runCommand('OUTREACH')">Start Outreach &#x2192;</button>
+  </div>
+
+  <!-- Revenue Progress -->
+  <div class="section-header">
+    <h2 class="section-title">Revenue Progress</h2>
+  </div>
+
+  <div class="progress-block">
+    <div class="progress-top">
+      <div class="progress-current">$3,000<span style="font-size:14px;font-family:'JetBrains Mono';color:var(--muted);font-weight:400;">/mo</span></div>
+      <div class="progress-target">Target: <strong>$6,000/mo</strong></div>
     </div>
-  </footer>
+    <div class="bar-track">
+      <div class="bar-fill" id="revenueBar"></div>
+    </div>
+    <div class="progress-labels">
+      <div class="prog-label">$0</div>
+      <div class="prog-label">$2K<br><small>cover costs</small></div>
+      <div class="prog-label active">$3K<br><small>you are here</small></div>
+      <div class="prog-label">$5K<br><small>scale</small></div>
+      <div class="prog-label win-label">$6K<br><small>target &#x2713;</small></div>
+    </div>
+  </div>
 
-</div>
+  <!-- Milestones -->
+  <div class="section-header">
+    <h2 class="section-title">What Each Level Unlocks</h2>
+  </div>
+
+  <div class="unlocks">
+    <div class="unlock-card">
+      <div class="unlock-at">$4,000</div>
+      <div class="unlock-title">Margin Above Water</div>
+      <div class="unlock-desc">Hit 30%+ net margin. Every gig starts paying you, not just covering you.</div>
+    </div>
+    <div class="unlock-card">
+      <div class="unlock-at">$6,000</div>
+      <div class="unlock-title">Admin Off Your Plate</div>
+      <div class="unlock-desc">Revenue to hire part-time ops. Your 15 hrs/week go to the stage, not paperwork.</div>
+    </div>
+    <div class="unlock-card">
+      <div class="unlock-at">$10,000</div>
+      <div class="unlock-title">National Bookings</div>
+      <div class="unlock-desc">Atlanta to regional to national. Music historian angle opens new rooms.</div>
+    </div>
+    <div class="unlock-card is-win">
+      <div class="unlock-at">$20,000</div>
+      <div class="unlock-title">International Tour &#x1F3C6;</div>
+      <div class="unlock-desc">Full vision realized. Gigging internationally, educational platform running.</div>
+    </div>
+  </div>
+
+  <!-- Priority Moves -->
+  <div class="section-header">
+    <h2 class="section-title">Priority Moves</h2>
+  </div>
+
+  <div class="moves-list">
+    <div class="move-card now" onclick="runCommand('BOOKINGS')" style="animation-delay:0.05s">
+      <div class="move-body">
+        <div class="move-name">Bookings</div>
+        <div class="move-action">Close 1 gig this week — the pitch is ready</div>
+      </div>
+      <div class="move-right">
+        <span class="move-revenue">+$1K/gig</span>
+        <span class="move-status status-now">Now</span>
+      </div>
+    </div>
+    <div class="move-card building" onclick="runCommand('CONTENT')" style="animation-delay:0.10s">
+      <div class="move-body">
+        <div class="move-name">Content</div>
+        <div class="move-action">4-week calendar — convert 13K followers to inquiries</div>
+      </div>
+      <div class="move-right">
+        <span class="move-revenue">+$500/mo</span>
+        <span class="move-status status-build">Building</span>
+      </div>
+    </div>
+    <div class="move-card queued" onclick="runCommand('REVENUE')" style="animation-delay:0.15s">
+      <div class="move-body">
+        <div class="move-name">Revenue</div>
+        <div class="move-action">Find the margin leaks — 20% net is the floor, not the ceiling</div>
+      </div>
+      <div class="move-right">
+        <span class="move-revenue">+$2K/mo</span>
+        <span class="move-status status-queue">Queued</span>
+      </div>
+    </div>
+    <div class="move-card queued" onclick="runCommand('ADMIN')" style="animation-delay:0.20s">
+      <div class="move-body">
+        <div class="move-name">Admin</div>
+        <div class="move-action">Build the system — reclaim 5 hrs/week from the chaos</div>
+      </div>
+      <div class="move-right">
+        <span class="move-revenue">5 hrs back</span>
+        <span class="move-status status-queue">Queued</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Commands -->
+  <div class="section-header">
+    <h2 class="section-title">Quick Commands</h2>
+  </div>
+
+  <div class="triggers-wrap">
+    <div class="chip" onclick="runCommand('BOOKINGS')">BOOKINGS</div>
+    <div class="chip" onclick="runCommand('CONTENT')">CONTENT</div>
+    <div class="chip" onclick="runCommand('REVENUE')">REVENUE</div>
+    <div class="chip" onclick="runCommand('ADMIN')">ADMIN</div>
+    <div class="chip" onclick="runCommand('OUTREACH')">OUTREACH</div>
+  </div>
+
+  <!-- AI Response Area -->
+  <div class="section-header" id="responseHeader" style="display:none;">
+    <h2 class="section-title">BASH Response</h2>
+  </div>
+
+  <div class="response-outer" id="responseOuter">
+    <div class="response-area" id="responseArea">
+      <div class="response-tag">FounderOS</div>
+      <div id="responseContent"></div>
+      <div class="response-meta" id="responseMeta" style="display:none;">
+        <span class="response-ts" id="responseTs"></span>
+        <button class="copy-btn" id="copyBtn">COPY</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-spacer"></div>
+
+  <!-- Sticky command zone -->
+  <div class="command-zone">
+    <div class="command-hint" id="cmdHint">Enter to send &nbsp;&#xb7;&nbsp; Shift+Enter for new line</div>
+    <div class="command-row">
+      <input
+        class="command-input"
+        id="commandInput"
+        type="text"
+        placeholder="type a command or question..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="command-run" id="runBtn" onclick="sendMessage()" disabled>RUN</button>
+    </div>
+  </div>
+
 <script>
 // ── System prompt ────────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are FounderOS, the dedicated business operating system for Jeremy Avalon LLC. You exist to help Jeremy build a sustainable, scalable DJ and music performance business — starting with Atlanta, expanding nationally and internationally.
@@ -619,147 +977,108 @@ const SYSTEM_PROMPT = `You are FounderOS, the dedicated business operating syste
 
 ## RESPONSE FORMAT
 Every response must include these exact section headers:
-
 **SITUATION:** One-line read of where things stand
 **ACTION ITEMS:** 3-5 specific, executable tasks with clear owners and deadlines (use numbered list)
 **METRICS:** How to measure progress
-**NEXT SESSION:** What to focus on next time
-
-## COLD START
-On first message (any content), output exactly this and nothing else:
-
-FounderOS loaded — jeremy-avalon
-
-You have 13K on Instagram and 7K on TikTok — and 1-3 bookings a month. The audience is there. The pipeline is not. Today we fix that.
-
-BOOKINGS — close something this week
-CONTENT — build a 4-week calendar that works
-REVENUE — find the money you are leaving on the table
-ADMIN — reclaim 5 hours a week with a real system
-OUTREACH — build your Atlanta venue list and start sending`;
+**NEXT SESSION:** What to focus on next time`;
 
 // ── State ────────────────────────────────────────────────────────────────
 let messages  = [];
 let isLoading = false;
-let sessionNum = 1;
+let lastReply = '';
 
-const innerEl   = document.getElementById('messages-inner');
-const msgsEl    = document.getElementById('messages');
-const inputEl   = document.getElementById('user-input');
-const runBtn    = document.getElementById('run-btn');
-const statusDot = document.getElementById('status-dot');
-const initEl    = document.getElementById('init-state');
+const inputEl   = document.getElementById('commandInput');
+const runBtn    = document.getElementById('runBtn');
+const outerEl   = document.getElementById('responseOuter');
+const areaEl    = document.getElementById('responseArea');
+const contentEl = document.getElementById('responseContent');
+const metaEl    = document.getElementById('responseMeta');
+const tsEl      = document.getElementById('responseTs');
+const copyBtn   = document.getElementById('copyBtn');
+const hdrEl     = document.getElementById('responseHeader');
+const hintEl    = document.getElementById('cmdHint');
 
-// ── Session counter (persisted) ──────────────────────────────────────────
-try {
-  sessionNum = parseInt(localStorage.getItem('bash_session') || '0', 10) + 1;
-  localStorage.setItem('bash_session', sessionNum);
-} catch(e) {}
-document.getElementById('session-label').textContent =
-  'SESSION ' + String(sessionNum).padStart(2, '0');
+// ── Live clock ───────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours(), ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  const min = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('timeDisplay').textContent = `${h}:${min} ${ampm}`;
+}
+updateClock();
+setInterval(updateClock, 30000);
 
-// ── Timestamp ────────────────────────────────────────────────────────────
 function getTimestamp() {
   const now = new Date();
-  const mo = String(now.getMonth()+1).padStart(2,'0');
-  const dy = String(now.getDate()).padStart(2,'0');
-  const yr = String(now.getFullYear()).slice(-2);
+  const mo  = String(now.getMonth()+1).padStart(2,'0');
+  const dy  = String(now.getDate()).padStart(2,'0');
+  const yr  = String(now.getFullYear()).slice(-2);
   let h = now.getHours(), ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
   const min = String(now.getMinutes()).padStart(2,'0');
   return `${mo}.${dy}.${yr} · ${h}:${min} ${ampm}`;
 }
 
-// ── Markdown / section renderer ──────────────────────────────────────────
-// Detects OPE structured sections and renders each with a tag chip.
-// Falls back to generic markdown for unstructured text.
+// ── Revenue bar ──────────────────────────────────────────────────────────
+setTimeout(() => {
+  const bar = document.getElementById('revenueBar');
+  if (bar) bar.style.width = '50%'; // $3K of $6K
+}, 200);
 
-const SECTION_KEYS = ['SITUATION', 'ACTION ITEMS', 'METRICS', 'NEXT SESSION'];
-
+// ── Markdown renderer ────────────────────────────────────────────────────
 function renderSections(text) {
-  // Build regex to split on **SECTION:** markers
   const sectionRe = /\*\*(SITUATION|ACTION ITEMS|METRICS|NEXT SESSION):\*\*/gi;
-
   const parts = text.split(sectionRe);
-
-  // If no sections found, render as plain markdown
-  if (parts.length <= 1) return renderGeneric(text);
-
+  if (parts.length <= 1) return `<div class="r-body">${renderGeneric(text)}</div>`;
   let html = '';
-  let i = 0;
-
-  // Content before first section (if any)
-  if (parts[0].trim()) {
-    html += `<div class="section-body">${renderGeneric(parts[0].trim())}</div>`;
-  }
-  i = 1;
-
+  if (parts[0].trim()) html += `<div class="r-body">${renderGeneric(parts[0].trim())}</div>`;
+  let i = 1;
   while (i < parts.length) {
-    const label = parts[i];        // e.g. "SITUATION"
+    const label = parts[i];
     const body  = parts[i+1] || '';
-    html += `<div class="response-section">
-      <div class="section-tag">${label}</div>
-      <div class="section-body">${renderGeneric(body.trim())}</div>
+    html += `<div class="r-section">
+      <div class="r-tag">${label}</div>
+      <div class="r-body">${renderGeneric(body.trim())}</div>
     </div>`;
     i += 2;
   }
-
   return html;
 }
 
 function renderGeneric(text) {
   if (!text) return '';
+  let html = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  // Escape HTML
-  let html = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-  // Fenced code blocks first
   html = html.replace(/```[\s\S]*?```/g, m => {
-    const inner = m.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '');
+    const inner = m.replace(/^```[^\n]*\n?/,'').replace(/\n?```$/,'');
     return `\x00PRE\x00${encodeURIComponent(inner)}\x00/PRE\x00`;
   });
 
-  // Horizontal rules
   html = html.replace(/^[ \t]*---+[ \t]*$/gm, '\x00HR\x00');
-
-  // Bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-  // Inline code
   html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
 
-  // Ordered lists (numbered)
   html = html.replace(/((?:^[ \t]*\d+\.[ \t].+(?:\n|$))+)/gm, block => {
-    const items = block.trim().split('\n').map(l =>
-      `<li>${l.replace(/^[ \t]*\d+\.[ \t]/, '')}</li>`
-    ).join('');
+    const items = block.trim().split('\n').map(l => `<li>${l.replace(/^[ \t]*\d+\.[ \t]/,'')}</li>`).join('');
     return `\x00OL\x00${items}\x00/OL\x00`;
   });
 
-  // Unordered lists
   html = html.replace(/((?:^[ \t]*[-*][ \t].+(?:\n|$))+)/gm, block => {
-    const items = block.trim().split('\n').map(l =>
-      `<li>${l.replace(/^[ \t]*[-*][ \t]/, '')}</li>`
-    ).join('');
+    const items = block.trim().split('\n').map(l => `<li>${l.replace(/^[ \t]*[-*][ \t]/,'')}</li>`).join('');
     return `\x00UL\x00${items}\x00/UL\x00`;
   });
 
-  // Restore placeholders
   html = html
-    .replace(/\x00PRE\x00(.*?)\x00\/PRE\x00/g, (_, enc) =>
-      `<pre><code>${decodeURIComponent(enc)}</code></pre>`)
+    .replace(/\x00PRE\x00(.*?)\x00\/PRE\x00/g, (_,enc) => `<pre><code>${decodeURIComponent(enc)}</code></pre>`)
     .replace(/\x00HR\x00/g, '<hr>')
     .replace(/\x00OL\x00([\s\S]*?)\x00\/OL\x00/g, '<ol>$1</ol>')
     .replace(/\x00UL\x00([\s\S]*?)\x00\/UL\x00/g, '<ul>$1</ul>');
 
-  // Paragraphs
   html = html.split(/\n{2,}/).map(block => {
     block = block.trim();
     if (!block) return '';
-    if (/^<(ul|ol|pre|hr|li)/.test(block)) return block;
+    if (/^<(ul|ol|pre|hr)/.test(block)) return block;
     block = block.replace(/\n/g, '<br>');
     return `<p>${block}</p>`;
   }).join('\n');
@@ -767,177 +1086,72 @@ function renderGeneric(text) {
   return html;
 }
 
-// ── Cold start renderer ──────────────────────────────────────────────────
-function renderColdStart(text) {
-  // Parse the known cold start structure
-  const lines = text.split('\n').filter(l => l.trim());
-
-  const container = document.createElement('div');
-  container.className = 'msg-system';
-
-  let delay = 80;
-  const step = 120;
-
-  lines.forEach((line, idx) => {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-
-    let el;
-
-    // Header line: "FounderOS loaded — ..."
-    if (idx === 0) {
-      el = document.createElement('div');
-      el.className = 'cold-header cold-line';
-      el.textContent = trimmed;
-    }
-    // Headline: "You have..."
-    else if (trimmed.startsWith('You have')) {
-      el = document.createElement('div');
-      el.className = 'cold-headline cold-line';
-      // Emphasize "The audience is there. The pipeline is not."
-      const highlighted = trimmed.replace(
-        /(The audience is there\. The pipeline is not\.)/,
-        '<em>$1</em>'
-      );
-      el.innerHTML = highlighted;
-    }
-    // Command lines: "WORD — description"
-    else if (/^[A-Z\s]+\s*—/.test(trimmed)) {
-      const [cmd, ...rest] = trimmed.split('—');
-      el = document.createElement('div');
-      el.className = 'cold-commands cold-line';
-      el.innerHTML = `<div class="cold-cmd-line">
-        <span class="cold-cmd-name">${cmd.trim()}</span>
-        <span class="cold-cmd-desc">— ${rest.join('—').trim()}</span>
-      </div>`;
-    }
-    else {
-      el = document.createElement('p');
-      el.className = 'cold-line';
-      el.textContent = trimmed;
-    }
-
-    el.style.animationDelay = delay + 'ms';
-    delay += step;
-
-    container.appendChild(el);
-  });
-
-  return container;
+// ── Ripple effect ────────────────────────────────────────────────────────
+function addRipple(btn, e) {
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = (e ? e.clientX : rect.left + rect.width/2) - rect.left - size/2;
+  const y = (e ? e.clientY : rect.top + rect.height/2) - rect.top - size/2;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
 }
 
-// ── DOM helpers ──────────────────────────────────────────────────────────
-function createExchange(userText, hiddenUser) {
-  const ex = document.createElement('div');
-  ex.className = 'exchange';
+// ── Show response area ───────────────────────────────────────────────────
+function showLoading(cmd) {
+  hdrEl.style.display = '';
+  outerEl.classList.add('visible');
+  contentEl.innerHTML = `<div class="loading-wrap">
+    <span class="cursor-blink" aria-hidden="true"></span>
+    <div class="loading-status" id="loadingStatus"></div>
+  </div>`;
+  metaEl.style.display = 'none';
 
-  const uLine = document.createElement('div');
-  uLine.className = hiddenUser ? 'msg-user hidden' : 'msg-user';
-  uLine.textContent = userText;
-  ex.appendChild(uLine);
-
-  return ex;
-}
-
-function appendSystemMsg(exchange, text, isError, isColdStart) {
-  if (isError) {
-    const div = document.createElement('div');
-    div.className = 'msg-error';
-    div.textContent = text;
-    exchange.appendChild(div);
-    scroll();
-    return;
-  }
-
-  // Response meta (timestamp + copy)
-  const meta = document.createElement('div');
-  meta.className = 'response-meta';
-
-  const ts = document.createElement('span');
-  ts.textContent = getTimestamp();
-  meta.appendChild(ts);
-
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'copy-btn';
-  copyBtn.textContent = 'COPY';
-  copyBtn.setAttribute('aria-label', 'Copy response');
-  copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(text).then(() => {
-      copyBtn.textContent = 'COPIED';
-      copyBtn.classList.add('copied');
-      setTimeout(() => {
-        copyBtn.textContent = 'COPY';
-        copyBtn.classList.remove('copied');
-      }, 2000);
-    });
-  });
-  meta.appendChild(copyBtn);
-
-  exchange.appendChild(meta);
-
-  if (isColdStart) {
-    exchange.appendChild(renderColdStart(text));
-  } else {
-    const div = document.createElement('div');
-    div.className = 'msg-system';
-    div.innerHTML = renderSections(text);
-    exchange.appendChild(div);
-  }
-
-  scroll();
-}
-
-function appendLoading(exchange) {
-  const wrap = document.createElement('div');
-  wrap.className = 'loading-wrap';
-  wrap.id = 'loading-wrap';
-
-  const cursor = document.createElement('span');
-  cursor.className = 'cursor-blink';
-  cursor.setAttribute('aria-hidden', 'true');
-  wrap.appendChild(cursor);
-
-  const status = document.createElement('div');
-  status.className = 'loading-status';
-  status.id = 'loading-status';
-  wrap.appendChild(status);
-
-  exchange.appendChild(wrap);
-  scroll();
-
-  // Progressive status messages
   const t1 = setTimeout(() => {
-    status.textContent = 'Processing...';
-    status.classList.add('visible');
+    const s = document.getElementById('loadingStatus');
+    if (s) { s.textContent = 'Processing...'; s.classList.add('visible'); }
   }, 500);
   const t2 = setTimeout(() => {
-    status.textContent = 'Still thinking...';
+    const s = document.getElementById('loadingStatus');
+    if (s) s.textContent = 'Still thinking...';
   }, 3500);
 
-  wrap._timers = [t1, t2];
-  return wrap;
+  outerEl._timers = [t1, t2];
+  outerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function removeLoading() {
-  const el = document.getElementById('loading-wrap');
-  if (el) {
-    if (el._timers) el._timers.forEach(clearTimeout);
-    el.remove();
-  }
+function showResponse(text) {
+  if (outerEl._timers) outerEl._timers.forEach(clearTimeout);
+  lastReply = text;
+  contentEl.innerHTML = renderSections(text);
+  tsEl.textContent = getTimestamp();
+  metaEl.style.display = '';
+  copyBtn.textContent = 'COPY';
+  copyBtn.classList.remove('copied');
+  areaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function scroll() {
-  requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
+function showError(msg) {
+  if (outerEl._timers) outerEl._timers.forEach(clearTimeout);
+  contentEl.innerHTML = `<p style="color:var(--error);font-size:13px;">${msg}</p>`;
+  metaEl.style.display = 'none';
 }
+
+// ── Copy ─────────────────────────────────────────────────────────────────
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(lastReply).then(() => {
+    copyBtn.textContent = 'COPIED';
+    copyBtn.classList.add('copied');
+    setTimeout(() => { copyBtn.textContent = 'COPY'; copyBtn.classList.remove('copied'); }, 2000);
+  });
+});
 
 // ── API call ─────────────────────────────────────────────────────────────
-async function callClaude(userText, hiddenUser, isColdStart) {
-  messages.push({ role: 'user', content: userText });
-
-  const exchange = createExchange(userText, hiddenUser);
-  innerEl.appendChild(exchange);
-  appendLoading(exchange);
-
+async function callClaude(text) {
+  messages.push({ role: 'user', content: text });
+  showLoading(text);
   isLoading = true;
   runBtn.disabled = true;
 
@@ -958,19 +1172,10 @@ async function callClaude(userText, hiddenUser, isColdStart) {
 
     const reply = data.content[0].text;
     messages.push({ role: 'assistant', content: reply });
-
-    removeLoading();
-    appendSystemMsg(exchange, reply, false, isColdStart);
-
-    if (isColdStart) {
-      statusDot.classList.add('live');
-      statusDot.title = 'Connected';
-    }
+    showResponse(reply);
   } catch (err) {
     messages.pop();
-    removeLoading();
-    appendSystemMsg(exchange, 'Error: ' + err.message, true, false);
-    statusDot.title = 'Error';
+    showError('Error: ' + err.message);
   }
 
   isLoading = false;
@@ -979,17 +1184,17 @@ async function callClaude(userText, hiddenUser, isColdStart) {
 }
 
 // ── Send ─────────────────────────────────────────────────────────────────
-async function sendMessage() {
+async function sendMessage(e) {
   if (isLoading) return;
   const text = inputEl.value.trim();
   if (!text) return;
   inputEl.value = '';
-  inputEl.style.height = '36px';
   runBtn.disabled = true;
-  await callClaude(text, false, false);
+  if (e) addRipple(runBtn, e);
+  await callClaude(text);
 }
 
-function sendCmd(cmd) {
+function runCommand(cmd) {
   if (isLoading) return;
   inputEl.value = cmd;
   sendMessage();
@@ -1004,19 +1209,12 @@ inputEl.addEventListener('keydown', e => {
 });
 
 inputEl.addEventListener('input', () => {
-  inputEl.style.height = '36px';
-  const sh = Math.min(inputEl.scrollHeight, 144);
-  inputEl.style.height = sh + 'px';
-  inputEl.style.overflow = inputEl.scrollHeight > 144 ? 'auto' : 'hidden';
   runBtn.disabled = inputEl.value.trim().length === 0 || isLoading;
 });
 
-// ── Boot ─────────────────────────────────────────────────────────────────
-(async () => {
-  await callClaude('load', true, true);
-  // Hide init state after cold start loads
-  initEl.classList.add('hidden');
-})();
+inputEl.addEventListener('focus', () => { hintEl.style.opacity = '1'; });
+inputEl.addEventListener('blur',  () => { hintEl.style.opacity = '0.5'; });
+hintEl.style.opacity = '0.5';
 </script>
 </body>
 </html>
